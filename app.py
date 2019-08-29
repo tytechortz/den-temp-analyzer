@@ -10,9 +10,23 @@ import psycopg2
 
 conn = psycopg2.connect(host='localhost', database='denver_temps', user='postgres', password='1234')
 cur = conn.cursor()
-cur.execute("""CREATE TABLE dly_avg_norm(
+# cur.execute("""CREATE TABLE dly_avg_norm(
+# id integer PRIMARY KEY,
+# STATION text,
+# DATE DATE,
+# DLY_AVG_NORMAL float)""")
+# conn.commit()
+
+cur.execute("""CREATE TABLE dly_max_norm(
 id integer PRIMARY KEY,
 STATION text,
 DATE DATE,
-DLY_AVG_NORMAL float)""")
+DLY_NORMAL_MAX float)""")
+conn.commit()
+
+cur.execute("""CREATE TABLE dly_min_norm(
+id integer PRIMARY KEY,
+STATION text,
+DATE DATE,
+DLY_NORMAL_MIN float)""")
 conn.commit()

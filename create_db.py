@@ -17,16 +17,16 @@ cur = conn.cursor()
 # DLY_AVG_NORMAL float)""")
 # conn.commit()
 
-cur.execute("""CREATE TABLE dly_max_norm(
-id integer PRIMARY KEY,
-STATION text,
-DATE DATE,
-DLY_NORMAL_MAX float)""")
-conn.commit()
+# cur.execute("""CREATE TABLE dly_max_norm(
+# id integer PRIMARY KEY,
+# STATION text,
+# DATE DATE,
+# DLY_NORMAL_MAX float)""")
+# conn.commit()
 
-cur.execute("""CREATE TABLE dly_min_norm(
-id integer PRIMARY KEY,
-STATION text,
-DATE DATE,
-DLY_NORMAL_MIN float)""")
-conn.commit()
+# cur.execute("""CREATE TABLE dly_min_norm(
+# id integer PRIMARY KEY,
+# STATION text,
+# DATE DATE,
+# DLY_NORMAL_MIN float)""")
+# conn.commit()

@@ -30,3 +30,11 @@ cur = conn.cursor()
 # DATE DATE,
 # DLY_NORMAL_MIN float)""")
 # conn.commit()
+
+cur.execute("""CREATE TABLE data(
+id integer PRIMARY KEY,
+STATION text,
+DATE DATE,
+TMAX int,
+TMIN int)""")
+conn.commit()

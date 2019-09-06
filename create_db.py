@@ -11,7 +11,6 @@ today = time.strftime("%Y-%m-%d")
 df = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=' + today + '&units=standard').round(1)
 
 
-import sqlalchemy
 
 engine = sqlalchemy.create_engine("postgresql://postgres:1234@localhost/denver_temps")
 con = engine.connect()

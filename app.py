@@ -17,31 +17,31 @@ today = time.strftime("%Y-%m-%d")
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
-try:
-    connection = psycopg2.connect(user = "postgres",
-                                  password = "1234",
-                                  host = "localhost",
-                                  database = "denver_temps")
-    cursor = connection.cursor()
-    postgreSQL_select_Query = "select * from temps"
 
-    cursor.execute(postgreSQL_select_Query)
-    print("Selecting rows from mobile table using cursor.fetchall")
-    temp_records = cursor.fetchall()
+def getRecordTemp(month, day):
+    try:
+        connection = psycopg2.connect(user = "postgres",
+                                    password = "1234",
+                                    host = "localhost",
+                                    database = "denver_temps")
+        cursor = connection.cursor()
+        postgreSQL_select_Query = 'SELECT max("TMAX") FROM temps WHERE EXTRACT(month FROM "DATE"::TIMESTAMP) = {} AND EXTRACT(day FROM "DATE"::TIMESTAMP) = {}'.format(month, day)
 
-    print("Print each row and it's columns values")
-    for row in temp_records:
-        print("Id = ", row[0], )
-        print("Station = ", row[1])
-        print("Date = ", row[2])
-        print("TMax = ", row[3])
-        
-except (Exception, psycopg2.Error) as error :
-    print ("Error while fetching data from PostgreSQL", error)
- 
-finally:
-    #closing database connection.
-    if(connection):
-        cursor.close()
-        connection.close()
-        print("PostgreSQL connection is closed")
+        cursor.execute(postgreSQL_select_Query)
+        print("Selecting rows from temps using fetchone")
+        temp_records = cursor.fetchone()
+
+        print("Print each row and it's columns values")
+        print(temp_records)
+            
+    except (Exception, psycopg2.Error) as error :
+        print ("Error while fetching data from PostgreSQL", error)
+    
+    finally:
+        #closing database connection.
+        if(connection):
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+getRecordTemp(1, 1)

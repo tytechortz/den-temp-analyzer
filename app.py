@@ -17,6 +17,12 @@ today = time.strftime("%Y-%m-%d")
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
+# year list for dropdown selector
+# year = []
+# for YEAR in df.index.year.unique():
+#     year.append({'label':(YEAR), 'value':YEAR})
+
+
 
 def getRecordTemp(month, day):
     try:
@@ -46,6 +52,30 @@ def getRecordTemp(month, day):
 
 getRecordTemp(2, 2)
 
+def getMaxTempYear():
+    try:
+        connection = psycopg2.connect(user = "postgres",
+                                    password = "1234",
+                                    host = "localhost",
+                                    database = "denver_temps")
+        cursor = connection.cursor()
+        postgreSQL_select_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) = 1972'
+
+        cursor.execute(postgreSQL_select_Query)
+        temp_records = cursor.fetchall()
+        print(temp_records)
+
+    except (Exception, psycopg2.Error) as error :
+        print ("Error while fetching data from PostgreSQL", error)
+    
+    finally:
+        #closing database connection.
+        if(connection):
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+getMaxTempYear()
+
 
 body = dbc.Container([
     dbc.Row([
@@ -58,7 +88,27 @@ body = dbc.Container([
     ],
     justify='around',
     ),
+    dbc.Row([
+        dbc.Col(
+            html.H5('SELECT YEAR', style={'text-align':'center'})
+        ),
+    ]),
+    # dbc.Row([
+    #     dbc.Col(
+    #         dcc.Dropdown(id='year-picker', options=year
+    #         ),
+    #         width = {'size': 3}), 
+    # ],
+    # justify='around',
+    # )
 ])
+
+
+
+# @app.callback(Output('graph', 'figure'),
+#             [Input('year-picker', 'value')])
+# def update_figure(selected_year):
+
 
 
 app.layout = html.Div(body)

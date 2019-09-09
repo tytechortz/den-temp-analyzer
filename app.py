@@ -45,3 +45,23 @@ def getRecordTemp(month, day):
             print("PostgreSQL connection is closed")
 
 getRecordTemp(2, 2)
+
+
+body = dbc.Container([
+    dbc.Row([
+        dbc.Col(
+            html.Div([
+                dcc.Graph(id='graph1'),
+            ]),
+            width={'size':6}
+        ),
+    ],
+    justify='around',
+    ),
+])
+
+
+app.layout = html.Div(body)
+
+if __name__ == "__main__":
+    app.run_server(port=8050, debug=True)

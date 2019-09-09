@@ -25,14 +25,14 @@ def getRecordTemp(month, day):
                                     host = "localhost",
                                     database = "denver_temps")
         cursor = connection.cursor()
-        postgreSQL_select_Query = 'SELECT max("TMAX") FROM temps WHERE EXTRACT(month FROM "DATE"::TIMESTAMP) = {} AND EXTRACT(day FROM "DATE"::TIMESTAMP) = {}'.format(month, day)
+        postgreSQL_select_Query = 'SELECT ("TMAX"), "DATE" FROM temps WHERE EXTRACT(month FROM "DATE"::TIMESTAMP) = {} AND EXTRACT(day FROM "DATE"::TIMESTAMP) = {} GROUP BY "TMAX", "DATE"'.format(month, day) 
 
         cursor.execute(postgreSQL_select_Query)
         print("Selecting rows from temps using fetchone")
-        temp_records = cursor.fetchone()
+        temp_records = cursor.fetchall()
 
         print("Print each row and it's columns values")
-        print(temp_records)
+        print(temp_records[0])
             
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
@@ -44,4 +44,4 @@ def getRecordTemp(month, day):
             connection.close()
             print("PostgreSQL connection is closed")
 
-getRecordTemp(1, 1)
+getRecordTemp(2, 2)

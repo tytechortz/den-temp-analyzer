@@ -27,7 +27,7 @@ app.config['suppress_callback_exceptions']=True
 
 # year list for dropdown selector
 year = []
-for YEAR in range(1950, current_year):
+for YEAR in range(1950, current_year+1):
     year.append({'label':(YEAR), 'value':YEAR})
 
 
@@ -91,7 +91,7 @@ body = dbc.Container([
             html.Div([
                 dcc.Graph(id='graph1'),
             ]),
-            width={'size':6}
+            width={'size':8}
         ),
     ],
     justify='around',
@@ -127,10 +127,15 @@ def update_figure(selected_year):
 
         cursor.execute(postgreSQL_select_Query)
         temp_records = cursor.fetchall()
-        print(temp_records)
+        # print(temp_records)
         data = pd.DataFrame(temp_records)
         print(data.head(10))
-
+        daily_temp_range = data[3]
+        # print(daily_max)
+        top = data[3].tolist()
+        print(top)
+        bottom = data[4].tolist()
+        print(bottom)
 
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
@@ -142,23 +147,29 @@ def update_figure(selected_year):
             connection.close()
             print("PostgreSQL connection is closed")
 
+    # data = [
+    #     go.Bar(
+    #         x=
+    #         y=
+    #     )
+    # ]
     # traces.append(go.Scatter(
-    #     y = year_param_min,
-    #     name = param,
+    #     y = daily_max,
+    #     # name = param,
     #     line = {'color':'dodgerblue'}
     #     ))
 
-    # return {
-    #     'data': traces,
-    #     'layout': go.Layout(
-    #         xaxis = {'title': 'DAY'},
-    #         yaxis = {'title': 'TEMP'},
-    #         hovermode = 'closest',
-    #         title = 'Daily Temps',
-    #         height = 400,
+    return {
+        'data': traces,
+        'layout': go.Layout(
+            xaxis = {'title': 'DAY'},
+            yaxis = {'title': 'TEMP'},
+            hovermode = 'closest',
+            title = 'Daily Temps',
+            height = 400,
 
-    #     )
-    # }
+        )
+    }
 
 
 
@@ -169,4 +180,4 @@ def update_figure(selected_year):
 app.layout = html.Div(body)
 
 if __name__ == "__main__":
-    app.run_server(port=8050, debug=True)
+    app.run_server(port=8050, debug=False)

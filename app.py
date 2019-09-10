@@ -44,21 +44,25 @@ body = dbc.Container([
     dbc.Row([
         dbc.Col(
             dcc.RadioItems(id='product', options=[
+                {'label':'Temperature graphs', 'value':'Temperature graphs'},
                 {'label':'Calendar day summaries', 'value':'Calendar day summaries'},
-                {'label':'Temperature graphs', 'value':'Temperature graphs'}
-            ]
+            ],
             ),
             width = {'size': 3}
     # justify='around',
     ),
-        dbc.Col(
-            dcc.Input(
-                id='year',
-                value = 0,
-                type = "number"
-            ),
-            width = {'size': 3}
-        ),
+        # dbc.Col(
+        #     dcc.Input(
+        #         id='year',
+        #         # value = year[-1],
+        #         type = 'number',
+        #         placeholder = "input year"
+        #     ),
+        #     width = {'size': 3}
+        # ),
+        html.Div(
+            id = 'year-picker'
+        )
     ]),
     dbc.Row([
         dbc.Col(
@@ -75,17 +79,27 @@ body = dbc.Container([
             html.H5('SELECT YEAR', style={'text-align':'center'})
         ),
     ]),
-    dbc.Row([
-        dbc.Col(
-            dcc.Dropdown(id='year-picker', options=year
-            ),
-            width = {'size': 3}), 
-    ],
-    justify='around',
-    )
+    # dbc.Row([
+    #     dbc.Col(
+    #         dcc.Dropdown(id='year-picker', options=year
+    #         ),
+    #         width = {'size': 3}), 
+    # ],
+    # justify='around',
+    # )
 ])
 
-
+@app.callback(Output('year-picker', 'children'),
+             [Input('product', 'value')])
+def display_year_selector(product_value):
+    print(product_value)
+    if product_value == 'Temperature graphs':
+        return dcc.Input(
+                    id='year',
+                    # value = year[-1],
+                    type = 'number',
+                    placeholder = "input year"
+                ),
 
 
 @app.callback(Output('graph1', 'figure'),
@@ -105,8 +119,7 @@ def update_figure(selected_year):
         # print(temp_records)
         df = pd.DataFrame(temp_records)
         df[5] = df[3] - df[4]
-        print(data.head(10))
-        daily_temp_range = df[3]
+        print(df.head(10))
         # print(daily_max)
         
     except (Exception, psycopg2.Error) as error :

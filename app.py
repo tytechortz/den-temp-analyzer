@@ -15,6 +15,7 @@ from scipy.stats import norm
 from numpy import arange,array,ones 
 import dash_table 
 import psycopg2
+import operator
 
 current_year = datetime.now().year
 today = time.strftime("%Y-%m-%d")
@@ -91,10 +92,10 @@ body = dbc.Container([
             html.Div([
                 dcc.Graph(id='graph1'),
             ]),
-            width={'size':8}
+            width={'size':12}
         ),
     ],
-    justify='around',
+    # justify='around',
     ),
     dbc.Row([
         dbc.Col(
@@ -134,8 +135,13 @@ def update_figure(selected_year):
         # print(daily_max)
         top = data[3].tolist()
         print(top)
+        
         bottom = data[4].tolist()
         print(bottom)
+        t = list(map(operator.sub, top, bottom))
+        print(t)
+        ran = []
+        
 
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
@@ -147,29 +153,43 @@ def update_figure(selected_year):
             connection.close()
             print("PostgreSQL connection is closed")
 
-    # data = [
-    #     go.Bar(
-    #         x=
-    #         y=
-    #     )
-    # ]
+    trace = [
+        # go.Candlestick(
+        #     # x=data[2],
+        #     open='Null',high=top,low=bottom, close='Null'
+        # ),
+        go.Bar(
+            y=t,
+            base=bottom,
+            marker = {'color':'dodgerblue'}
+        )
+    ]
+    layout = go.Layout(
+            xaxis={'rangeslider': {'visible':True},},
+            yaxis={"title": 'stuff'},
+            title='Daily Temps',
+            plot_bgcolor = 'lightgray',
+            height = 600,
+            # barmode='stack'
+        )
+    return {'data': trace, 'layout': layout}
     # traces.append(go.Scatter(
     #     y = daily_max,
     #     # name = param,
     #     line = {'color':'dodgerblue'}
     #     ))
 
-    return {
-        'data': traces,
-        'layout': go.Layout(
-            xaxis = {'title': 'DAY'},
-            yaxis = {'title': 'TEMP'},
-            hovermode = 'closest',
-            title = 'Daily Temps',
-            height = 400,
+    # return {
+    #     'data': data,
+    #     'layout': go.Layout(
+    #         xaxis = {'title': 'DAY'},
+    #         yaxis = {'title': 'TEMP'},
+    #         hovermode = 'closest',
+    #         title = 'Daily Temps',
+    #         height = 600,
 
-        )
-    }
+    #     )
+    # }
 
 
 

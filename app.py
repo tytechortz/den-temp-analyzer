@@ -7,7 +7,6 @@ import pandas as pd
 import sqlite3
 from dash.dependencies import Input, Output, State
 import time
-# import datetime
 from datetime import datetime
 from pandas import Series
 from scipy import stats
@@ -31,49 +30,22 @@ year = []
 for YEAR in range(1950, current_year+1):
     year.append({'label':(YEAR), 'value':YEAR})
 
-
-
-def getRecordTemp(month, day):
-    try:
-        connection = psycopg2.connect(user = "postgres",
-                                    password = "1234",
-                                    host = "localhost",
-                                    database = "denver_temps")
-        cursor = connection.cursor()
-        postgreSQL_select_Query = 'SELECT ("TMAX"), "DATE" FROM temps WHERE EXTRACT(month FROM "DATE"::TIMESTAMP) = {} AND EXTRACT(day FROM "DATE"::TIMESTAMP) = {} GROUP BY "TMAX", "DATE"'.format(month, day) 
-
-        cursor.execute(postgreSQL_select_Query)
-        print("Selecting rows from temps using fetchone")
-        temp_records = cursor.fetchall()
-
-        print("Print each row and it's columns values")
-        print(temp_records[0])
-            
-    except (Exception, psycopg2.Error) as error :
-        print ("Error while fetching data from PostgreSQL", error)
-    
-    finally:
-        #closing database connection.
-        if(connection):
-            cursor.close()
-            connection.close()
-            print("PostgreSQL connection is closed")
-
-getRecordTemp(2, 2)
-
-# def getMaxTempYear():
+# def getRecordTemp(month, day):
 #     try:
 #         connection = psycopg2.connect(user = "postgres",
 #                                     password = "1234",
 #                                     host = "localhost",
 #                                     database = "denver_temps")
 #         cursor = connection.cursor()
-#         postgreSQL_select_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) = 1972'
+#         postgreSQL_select_Query = 'SELECT ("TMAX"), "DATE" FROM temps WHERE EXTRACT(month FROM "DATE"::TIMESTAMP) = {} AND EXTRACT(day FROM "DATE"::TIMESTAMP) = {} GROUP BY "TMAX", "DATE"'.format(month, day) 
 
 #         cursor.execute(postgreSQL_select_Query)
+#         print("Selecting rows from temps using fetchone")
 #         temp_records = cursor.fetchall()
-#         print(temp_records)
 
+#         print("Print each row and it's columns values")
+#         print(temp_records[0])
+            
 #     except (Exception, psycopg2.Error) as error :
 #         print ("Error while fetching data from PostgreSQL", error)
     
@@ -83,8 +55,8 @@ getRecordTemp(2, 2)
 #             cursor.close()
 #             connection.close()
 #             print("PostgreSQL connection is closed")
-# getMaxTempYear()
 
+# getRecordTemp(2, 2)
 
 body = dbc.Container([
     dbc.Row([
@@ -113,7 +85,6 @@ body = dbc.Container([
 ])
 
 
-
 @app.callback(Output('graph1', 'figure'),
              [Input('year-picker', 'value')])
 def update_figure(selected_year):
@@ -130,19 +101,19 @@ def update_figure(selected_year):
         temp_records = cursor.fetchall()
         # print(temp_records)
         data = pd.DataFrame(temp_records)
+        data[5] = data[3] - data[4]
         print(data.head(10))
         daily_temp_range = data[3]
         # print(daily_max)
         top = data[3].tolist()
-        print(top)
+        # print(top)
         
         bottom = data[4].tolist()
-        print(bottom)
+        # print(bottom)
         t = list(map(operator.sub, top, bottom))
-        print(t)
+        # print(t)
         ran = []
         
-
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
     
@@ -154,12 +125,8 @@ def update_figure(selected_year):
             print("PostgreSQL connection is closed")
 
     trace = [
-        # go.Candlestick(
-        #     # x=data[2],
-        #     open='Null',high=top,low=bottom, close='Null'
-        # ),
         go.Bar(
-            y=t,
+            y=data[5],
             base=bottom,
             marker = {'color':'dodgerblue'}
         )
@@ -169,34 +136,10 @@ def update_figure(selected_year):
             yaxis={"title": 'stuff'},
             title='Daily Temps',
             plot_bgcolor = 'lightgray',
-            height = 600,
-            # barmode='stack'
+            height = 900,
         )
     return {'data': trace, 'layout': layout}
-    # traces.append(go.Scatter(
-    #     y = daily_max,
-    #     # name = param,
-    #     line = {'color':'dodgerblue'}
-    #     ))
-
-    # return {
-    #     'data': data,
-    #     'layout': go.Layout(
-    #         xaxis = {'title': 'DAY'},
-    #         yaxis = {'title': 'TEMP'},
-    #         hovermode = 'closest',
-    #         title = 'Daily Temps',
-    #         height = 600,
-
-    #     )
-    # }
-
-
-
-
-
-
-
+   
 app.layout = html.Div(body)
 
 if __name__ == "__main__":

@@ -30,8 +30,6 @@ app.config['suppress_callback_exceptions']=True
 # for YEAR in range(1950, current_year+1):
 #     year.append({'label':(YEAR), 'value':YEAR})
 
-
-
 body = dbc.Container([
     dbc.Row([
         dbc.Col(
@@ -104,7 +102,11 @@ def display_period_selector(product_value):
         return  dcc.RadioItems(
                     id='period',
                     options = [
-                        {'label':'Annual', 'value':'annual'}
+                        {'label':'Annual (Jan-Dec)', 'value':'annual'},
+                        {'label':'Spring (Mar-May)', 'value':'spring'},
+                        {'label':'Summer (Jun-Aug)', 'value':'summer'},
+                        {'label':'Fall (Sep-Nov)', 'value':'fall'},
+                        {'label':'Winter (Dec-Feb)', 'value':'winter'},
                     ]
                 )
 

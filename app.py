@@ -100,14 +100,15 @@ def display_period_selector(product_value):
     print(product_value)
     if product_value == 'temp_graph':
         return  dcc.RadioItems(
-                    id='period',
+                    id = 'period',
                     options = [
                         {'label':'Annual (Jan-Dec)', 'value':'annual'},
                         {'label':'Spring (Mar-May)', 'value':'spring'},
                         {'label':'Summer (Jun-Aug)', 'value':'summer'},
                         {'label':'Fall (Sep-Nov)', 'value':'fall'},
                         {'label':'Winter (Dec-Feb)', 'value':'winter'},
-                    ]
+                    ],
+                    labelStyle = {'display':'block'}
                 )
 
 

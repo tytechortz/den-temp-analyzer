@@ -51,19 +51,19 @@ body = dbc.Container([
             width = {'size': 3}
     # justify='around',
     ),
-        html.Div(
-            id = 'year-picker'
-        ),
-        html.Div(
-            id = 'period-picker'
-        )
+            html.Div(
+                id = 'year-picker'
+            ),
+            html.Div(
+                id = 'period-picker'
+            )
     ]),
     dbc.Row([
         dbc.Col(
-            html.Div([
-                dcc.Graph(id='graph1'),
-            ]),
-            width={'size':9}
+            html.Div(
+                id='graph-stuff'
+            ),
+            width={'size':8}
         ),
     ],
     ),
@@ -82,10 +82,14 @@ def display_year_selector(product_value):
     if product_value == 'temp_graph':
         return dcc.Input(
                     id = 'year',
-                    # value = year[-1],
                     type = 'number',
-                    placeholder = "input year"
+                    placeholder = "input year",
+                    min = 1950, max = year
                 )
+
+# @app.callback(
+#     Output('', ''),
+#     [Input('product', 'value')])
 
 @app.callback(
     Output('period-picker', 'children'),
@@ -101,9 +105,19 @@ def display_period_selector(product_value):
                 )
 
 
+@app.callback(
+    Output('graph-stuff', 'children'),
+    [Input('product', 'value')])
+def display_graph(value):
+    print(value)
+    if value == 'temp_graph':
+        return dcc.Graph(id='graph1')
+
+
 @app.callback(Output('graph1', 'figure'),
-             [Input('year-picker', 'value')])
+             [Input('year', 'value')])
 def update_figure(selected_year):
+    print(selected_year)
     traces = []
     try:
         connection = psycopg2.connect(user = "postgres",

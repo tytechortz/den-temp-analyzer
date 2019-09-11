@@ -22,7 +22,7 @@ today = time.strftime("%Y-%m-%d")
 # df = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=2019-01-01&endDate=' + today + '&units=standard').round(1)
 # print(df.head())
 
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
 # year list for dropdown selector
@@ -48,27 +48,29 @@ body = dbc.Container([
             dcc.RadioItems(id='product', options=[
                 {'label':'Temperature graphs', 'value':'temp_graph'},
                 {'label':'Calendar day summaries', 'value':'cal_day_summary'},
-            ],
-            ),
+            ]),
             width = {'size': 3}
     # justify='around',
     ),
             html.Div(
                 id = 'year-picker'
             ),
-            html.Div(
-                id = 'period-picker'
-            )
+            
     ]),
     dbc.Row([
+        dbc.Col(
+            html.Div(
+                id = 'period-picker'
+            ),
+            width = {'size': 3}
+        ),
         dbc.Col(
             html.Div(
                 id='graph-stuff'
             ),
             width={'size':8}
         ),
-    ],
-    ),
+    ]),
     dbc.Row([
         dbc.Col(
             html.H5('SELECT YEAR', style={'text-align':'center'})
@@ -160,7 +162,7 @@ def update_figure(selected_year):
             yaxis = {"title": 'Temperature F'},
             title ='Daily Temps',
             plot_bgcolor = 'lightgray',
-            height = 900,
+            height = 700,
         )
     return {'data': trace, 'layout': layout}
    

@@ -43,6 +43,11 @@ body = dbc.Container([
     ]),
     dbc.Row([
         dbc.Col(
+            html.Div('Select Product')
+        ),
+    ]),
+    dbc.Row([
+        dbc.Col(
             dcc.RadioItems(id='product', options=[
                 {'label':'Temperature graphs', 'value':'temp_graph'},
                 {'label':'Calendar day summaries', 'value':'cal_day_summary'},
@@ -54,6 +59,13 @@ body = dbc.Container([
                 id = 'year-picker'
             ),
             
+    ]),
+    dbc.Row([
+        dbc.Col(
+            html.Div(
+                id = 'graph-info-row'
+            )
+        ),
     ]),
     dbc.Row([
         dbc.Col(
@@ -76,11 +88,12 @@ body = dbc.Container([
     ]),
 ])
 
+
+
 @app.callback(
     Output('year-picker', 'children'),
     [Input('product', 'value')])
 def display_year_selector(product_value):
-    print(product_value)
     if product_value == 'temp_graph':
         return dcc.Input(
                     id = 'year',
@@ -89,15 +102,19 @@ def display_year_selector(product_value):
                     min = 1950, max = current_year
                 )
 
-# @app.callback(
-#     Output('', ''),
-#     [Input('product', 'value')])
+@app.callback(
+    Output('graph-info-row', 'children'),
+    [Input('product', 'value')])
+def display_graph_info_row(product_value):
+    print(product_value)
+    if product_value == 'temp_graph':
+        return html.Div('Select Period')
+        
 
 @app.callback(
     Output('period-picker', 'children'),
     [Input('product', 'value')])
 def display_period_selector(product_value):
-    print(product_value)
     if product_value == 'temp_graph':
         return  dcc.RadioItems(
                     id = 'period',
@@ -116,15 +133,15 @@ def display_period_selector(product_value):
     Output('graph-stuff', 'children'),
     [Input('product', 'value')])
 def display_graph(value):
-    print(value)
     if value == 'temp_graph':
         return dcc.Graph(id='graph1')
 
 
 @app.callback(Output('graph1', 'figure'),
-             [Input('year', 'value')])
-def update_figure(selected_year):
-    print(selected_year)
+             [Input('year', 'value'),
+             Input('period', 'value')])
+def update_figure(selected_year, period):
+    print(period)
     traces = []
     try:
         connection = psycopg2.connect(user = "postgres",
@@ -132,15 +149,10 @@ def update_figure(selected_year):
                                     host = "localhost",
                                     database = "denver_temps")
         cursor = connection.cursor()
-        postgreSQL_select_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) = {}'.format(selected_year)
+        postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) = {}'.format(selected_year)
 
-        cursor.execute(postgreSQL_select_Query)
+        cursor.execute(postgreSQL_select_year_Query)
         temp_records = cursor.fetchall()
-        # print(temp_records)
-        df = pd.DataFrame(temp_records)
-        df[5] = df[3] - df[4]
-        print(df.head(10))
-        # print(daily_max)
         
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
@@ -151,6 +163,12 @@ def update_figure(selected_year):
             cursor.close()
             connection.close()
             print("PostgreSQL connection is closed")
+
+    if period == 'annual':
+        df = pd.DataFrame(temp_records)
+        df[5] = df[3] - df[4]
+        print(df.head(10))
+        # print(daily_max)
 
     trace = [
         go.Bar(

@@ -26,9 +26,11 @@ app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
 # year list for dropdown selector
-year = []
-for YEAR in range(1950, current_year+1):
-    year.append({'label':(YEAR), 'value':YEAR})
+# year = []
+# for YEAR in range(1950, current_year+1):
+#     year.append({'label':(YEAR), 'value':YEAR})
+
+
 
 body = dbc.Container([
     dbc.Row([
@@ -83,8 +85,8 @@ def display_year_selector(product_value):
         return dcc.Input(
                     id = 'year',
                     type = 'number',
-                    placeholder = "input year",
-                    min = 1950, max = year
+                    value = str(current_year),
+                    min = 1950, max = current_year
                 )
 
 # @app.callback(

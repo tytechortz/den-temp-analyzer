@@ -15,6 +15,7 @@ from numpy import arange,array,ones
 import dash_table 
 import psycopg2
 import operator
+from dash.exceptions import PreventUpdate
 
 current_year = datetime.now().year
 today = time.strftime("%Y-%m-%d")
@@ -43,22 +44,36 @@ body = dbc.Container([
     ]),
     dbc.Row([
         dbc.Col(
-            html.Div('Select Product')
+            html.Div('Select Product'),
+            width = 4
+        ),
+        dbc.Col(
+            html.Div('Options')
         ),
     ]),
     dbc.Row([
         dbc.Col(
             dcc.RadioItems(id='product', options=[
-                {'label':'Temperature graphs', 'value':'temp_graph'},
-                {'label':'Calendar day summaries', 'value':'cal_day_summary'},
-            ]),
+                {'label':'Daily data for a month', 'value':'daily-data-month'},
+                {'label':'Temperature graphs', 'value':'temp-graph'},
+                {'label':'Calendar day summaries', 'value':'cal-day-summary'},
+            ],
+            value = 'daily_data_month'
+            ),
             width = {'size': 3}
     # justify='around',
-    ),
+        ),
+        dbc.Col(
+            html.Div(
+                id = 'time-param'
+            ),
+            width = {'size': 1}
+        ), 
+        dbc.Col(
             html.Div(
                 id = 'year-picker'
             ),
-            
+        )     
     ]),
     dbc.Row([
         dbc.Col(
@@ -88,19 +103,26 @@ body = dbc.Container([
     ]),
 ])
 
-
+@app.callback(
+    Output('time-param', 'children'),
+    [Input('product', 'value')])
+def display_time_param(product_value):
+    if product_value == 'daily-data-month':
+        return html.Div('Date: ')
 
 @app.callback(
     Output('year-picker', 'children'),
     [Input('product', 'value')])
 def display_year_selector(product_value):
-    if product_value == 'temp_graph':
+    if product_value == 'temp-graph':
         return dcc.Input(
                     id = 'year',
                     type = 'number',
                     value = str(current_year),
                     min = 1950, max = current_year
                 )
+    elif product_value == 'daily-data-month':
+        return 
 
 @app.callback(
     Output('graph-info-row', 'children'),
@@ -114,8 +136,12 @@ def display_graph_info_row(product_value):
 @app.callback(
     Output('period-picker', 'children'),
     [Input('product', 'value')])
+    # Input('year', 'value')])
+   
 def display_period_selector(product_value):
-    if product_value == 'temp_graph':
+    if product_value == 'temp-graph':
+        # def labeler():
+        #     return 
         return  dcc.RadioItems(
                     id = 'period',
                     options = [
@@ -133,7 +159,7 @@ def display_period_selector(product_value):
     Output('graph-stuff', 'children'),
     [Input('product', 'value')])
 def display_graph(value):
-    if value == 'temp_graph':
+    if value == 'temp-graph':
         return dcc.Graph(id='graph1')
 
 
@@ -153,7 +179,8 @@ def update_figure(selected_year, period):
 
         cursor.execute(postgreSQL_select_year_Query)
         temp_records = cursor.fetchall()
-        
+        df = pd.DataFrame(temp_records)
+        df[5] = df[3] - df[4]
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
     
@@ -165,14 +192,12 @@ def update_figure(selected_year, period):
             print("PostgreSQL connection is closed")
 
     if period == 'annual':
-        df = pd.DataFrame(temp_records)
-        df[5] = df[3] - df[4]
-        print(df.head(10))
-        # print(daily_max)
+        data_period = df[5]
+    # elif period == 'spring':
 
     trace = [
         go.Bar(
-            y = df[5],
+            y = data_period,
             base = df[4],
             marker = {'color':'dodgerblue'},
             hovertemplate = "<b>STUFF</b>"

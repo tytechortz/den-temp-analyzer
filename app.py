@@ -173,19 +173,43 @@ def display_graph(value):
 def update_figure(selected_year, period):
     print(period)
     traces = []
+    # try:
+    #     connection = psycopg2.connect(user = "postgres",
+    #                                 password = "1234",
+    #                                 host = "localhost",
+    #                                 database = "denver_temps")
+    #     cursor = connection.cursor()
+    #     postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) = {}'.format(selected_year)
+    #     cursor.execute(postgreSQL_select_year_Query)
+    #     temp_records = cursor.fetchall()
+
+
+    #     df = pd.DataFrame(temp_records)
+    #     df[5] = df[3] - df[4]
+    #     # df_avgs = postgreSQL_select_normal_high_Query
+    # except (Exception, psycopg2.Error) as error :
+    #     print ("Error while fetching data from PostgreSQL", error)
+    
+    # finally:
+    #     #closing database connection.
+    #     if(connection):
+    #         cursor.close()
+    #         connection.close()
+    #         print("PostgreSQL connection is closed")
+
     try:
         connection = psycopg2.connect(user = "postgres",
                                     password = "1234",
                                     host = "localhost",
                                     database = "denver_temps")
         cursor = connection.cursor()
-        postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) = {}'.format(selected_year)
-        # postgreSQL_select_normal_high_Query = 'SELECT * FROM 
+        postgreSQL_select_norms_Query = 'SELECT * FROM dly_max_norm'
+        cursor.execute(postgreSQL_select_norms_Query)
+        norms = cursor.fetchall()
 
-        cursor.execute(postgreSQL_select_year_Query)
-        temp_records = cursor.fetchall()
-        df = pd.DataFrame(temp_records)
-        df[5] = df[3] - df[4]
+        df_norms = pd.DataFrame(norms)
+        print(df_norms)
+      
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
     
@@ -197,20 +221,19 @@ def update_figure(selected_year, period):
             print("PostgreSQL connection is closed")
 
     if period == 'annual':
-        data_period = df[5]
-        print(data_period.head())
-        print(df[4].head())
+        # data_period = df[5]
+        print(df_norms[4])
     # elif period == 'spring':
 
     trace = [
-        go.Bar(
-            y = data_period,
-            base = df[4],
-            marker = {'color':'dodgerblue'},
-            hovertemplate = "<b>STUFF</b>"
-        ),
+        # go.Bar(
+        #     y = data_period,
+        #     base = df[4],
+        #     marker = {'color':'dodgerblue'},
+        #     hovertemplate = "<b>STUFF</b>"
+        # ),
         go.Scatter(
-            # y = 40
+            y = df_norms[4]
         )
     ]
     layout = go.Layout(

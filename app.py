@@ -73,6 +73,7 @@ body = dbc.Container([
             html.Div(
                 id = 'year-picker'
             ),
+            width = {'size': 1}
         )     
     ]),
     dbc.Row([
@@ -108,7 +109,9 @@ body = dbc.Container([
     [Input('product', 'value')])
 def display_time_param(product_value):
     if product_value == 'daily-data-month':
-        return html.Div('Date: ')
+        return html.Div('Date:')
+    elif product_value == 'temp-graph':
+        return html.Div([html.H3('Year:')])
 
 @app.callback(
     Output('year-picker', 'children'),
@@ -129,7 +132,7 @@ def display_year_selector(product_value):
     [Input('product', 'value')])
 def display_graph_info_row(product_value):
     print(product_value)
-    if product_value == 'temp_graph':
+    if product_value == 'temp-graph':
         return html.Div('Select Period')
         
 
@@ -151,6 +154,7 @@ def display_period_selector(product_value):
                         {'label':'Fall (Sep-Nov)', 'value':'fall'},
                         {'label':'Winter (Dec-Feb)', 'value':'winter'},
                     ],
+                    value = 'annual',
                     labelStyle = {'display':'block'}
                 )
 
@@ -176,6 +180,7 @@ def update_figure(selected_year, period):
                                     database = "denver_temps")
         cursor = connection.cursor()
         postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) = {}'.format(selected_year)
+        # postgreSQL_select_normal_high_Query = 'SELECT * FROM 
 
         cursor.execute(postgreSQL_select_year_Query)
         temp_records = cursor.fetchall()
@@ -193,6 +198,8 @@ def update_figure(selected_year, period):
 
     if period == 'annual':
         data_period = df[5]
+        print(data_period.head())
+        print(df[4].head())
     # elif period == 'spring':
 
     trace = [
@@ -201,6 +208,9 @@ def update_figure(selected_year, period):
             base = df[4],
             marker = {'color':'dodgerblue'},
             hovertemplate = "<b>STUFF</b>"
+        ),
+        go.Scatter(
+            # y = 40
         )
     ]
     layout = go.Layout(
@@ -211,7 +221,7 @@ def update_figure(selected_year, period):
             height = 700,
         )
     return {'data': trace, 'layout': layout}
-   
+
 app.layout = html.Div(body)
 
 if __name__ == "__main__":

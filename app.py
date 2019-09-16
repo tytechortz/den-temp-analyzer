@@ -232,12 +232,17 @@ def update_figure(selected_year, period):
         print(df_norms[3])
     # elif period == 'spring':
 
+    norm_traces = [df_norms[3], df_norms[4]]
+
     trace = [
         go.Bar(
             y = data_period,
             base = df[4],
             marker = {'color':'dodgerblue'},
             hovertemplate = "<b>STUFF</b>"
+        ),
+        go.Scatter(
+            y = df_norms[4],
         ),
         go.Scatter(
             y = df_norms[3]

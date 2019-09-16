@@ -190,7 +190,7 @@ def update_figure(selected_year, period):
 
         postgreSQL_select_record_high_Query = 'SELECT max(ALL "TMAX") AS rec_high, to_char("DATE"::TIMESTAMP,\'MM-DD\') AS day FROM temps GROUP BY day ORDER BY day ASC'
         cursor.execute(postgreSQL_select_record_high_Query)
-        df_record_highs = cursor.fetchall()
+        rec_highs = cursor.fetchall()
 
         df = pd.DataFrame(temp_records)
         df[5] = df[3] - df[4]
@@ -231,9 +231,9 @@ def update_figure(selected_year, period):
         go.Scatter(
             y = df_norms[3]
         ),
-        # go.Scatter(
-        #     y = df[3].max()
-        # )
+        go.Scatter(
+            y = df_record_highs[0]
+        )
     ]
     layout = go.Layout(
             xaxis = {'rangeslider': {'visible':True},},

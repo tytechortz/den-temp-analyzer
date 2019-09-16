@@ -178,14 +178,21 @@ def update_figure(selected_year, period):
                                     password = "1234",
                                     host = "localhost",
                                     database = "denver_temps")
+
         cursor = connection.cursor()
+
         postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) = {}'.format(selected_year)
         cursor.execute(postgreSQL_select_year_Query)
         temp_records = cursor.fetchall()
 
+        postgreSQL_select_norms_Query = 'SELECT * FROM dly_max_norm'
+        cursor.execute(postgreSQL_select_norms_Query)
+        norms = cursor.fetchall()
 
         df = pd.DataFrame(temp_records)
         df[5] = df[3] - df[4]
+        df_norms = pd.DataFrame(norms)
+
         # df_avgs = postgreSQL_select_normal_high_Query
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
@@ -197,28 +204,28 @@ def update_figure(selected_year, period):
             connection.close()
             print("PostgreSQL connection is closed")
 
-    try:
-        connection = psycopg2.connect(user = "postgres",
-                                    password = "1234",
-                                    host = "localhost",
-                                    database = "denver_temps")
-        cursor = connection.cursor()
-        postgreSQL_select_norms_Query = 'SELECT * FROM dly_max_norm'
-        cursor.execute(postgreSQL_select_norms_Query)
-        norms = cursor.fetchall()
+    # try:
+    #     connection = psycopg2.connect(user = "postgres",
+    #                                 password = "1234",
+    #                                 host = "localhost",
+    #                                 database = "denver_temps")
+    #     cursor = connection.cursor()
+    #     postgreSQL_select_norms_Query = 'SELECT * FROM dly_max_norm'
+    #     cursor.execute(postgreSQL_select_norms_Query)
+    #     norms = cursor.fetchall()
 
-        df_norms = pd.DataFrame(norms)
-        print(df_norms)
+    #     df_norms = pd.DataFrame(norms)
+    #     print(df_norms)
       
-    except (Exception, psycopg2.Error) as error :
-        print ("Error while fetching data from PostgreSQL", error)
+    # except (Exception, psycopg2.Error) as error :
+    #     print ("Error while fetching data from PostgreSQL", error)
     
-    finally:
-        #closing database connection.
-        if(connection):
-            cursor.close()
-            connection.close()
-            print("PostgreSQL connection is closed")
+    # finally:
+    #     #closing database connection.
+    #     if(connection):
+    #         cursor.close()
+    #         connection.close()
+    #         print("PostgreSQL connection is closed")
 
     if period == 'annual':
         data_period = df[5]

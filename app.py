@@ -198,6 +198,8 @@ def update_figure(selected_year, period):
         df_norms = pd.DataFrame(norms)
         df_record_highs = pd.DataFrame(rec_highs)
         print(df_record_highs)
+        df_record_highs_ly = df_record_highs.drop(60)
+        
 
         # df_avgs = postgreSQL_select_normal_high_Query
     except (Exception, psycopg2.Error) as error :
@@ -232,7 +234,7 @@ def update_figure(selected_year, period):
             y = df_norms[3]
         ),
         go.Scatter(
-            y = df_record_highs[0]
+            y = df_record_highs_ly[0]
         )
     ]
     layout = go.Layout(

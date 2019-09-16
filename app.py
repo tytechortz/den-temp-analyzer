@@ -204,28 +204,6 @@ def update_figure(selected_year, period):
             connection.close()
             print("PostgreSQL connection is closed")
 
-    # try:
-    #     connection = psycopg2.connect(user = "postgres",
-    #                                 password = "1234",
-    #                                 host = "localhost",
-    #                                 database = "denver_temps")
-    #     cursor = connection.cursor()
-    #     postgreSQL_select_norms_Query = 'SELECT * FROM dly_max_norm'
-    #     cursor.execute(postgreSQL_select_norms_Query)
-    #     norms = cursor.fetchall()
-
-    #     df_norms = pd.DataFrame(norms)
-    #     print(df_norms)
-      
-    # except (Exception, psycopg2.Error) as error :
-    #     print ("Error while fetching data from PostgreSQL", error)
-    
-    # finally:
-    #     #closing database connection.
-    #     if(connection):
-    #         cursor.close()
-    #         connection.close()
-    #         print("PostgreSQL connection is closed")
 
     if period == 'annual':
         data_period = df[5]

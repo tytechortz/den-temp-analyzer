@@ -158,7 +158,6 @@ def display_period_selector(product_value):
                     labelStyle = {'display':'block'}
                 )
 
-
 @app.callback(
     Output('graph-stuff', 'children'),
     [Input('product', 'value')])
@@ -189,9 +188,16 @@ def update_figure(selected_year, period):
         cursor.execute(postgreSQL_select_norms_Query)
         norms = cursor.fetchall()
 
+        postgreSQL_select_record_high_Query = 'SELECT max(ALL "TMAX") AS rec_high, to_char("DATE"::TIMESTAMP,\'MM-DD\') AS day FROM temps GROUP BY day ORDER BY day ASC'
+        cursor.execute(postgreSQL_select_record_high_Query)
+        df_record_highs = cursor.fetchall()
+
         df = pd.DataFrame(temp_records)
         df[5] = df[3] - df[4]
+        print(df)
         df_norms = pd.DataFrame(norms)
+        df_record_highs = pd.DataFrame(rec_highs)
+        print(df_record_highs)
 
         # df_avgs = postgreSQL_select_normal_high_Query
     except (Exception, psycopg2.Error) as error :
@@ -207,7 +213,7 @@ def update_figure(selected_year, period):
 
     if period == 'annual':
         data_period = df[5]
-        print(df_norms[3])
+        # print(df_norms[3])
     # elif period == 'spring':
 
     norm_traces = [df_norms[3], df_norms[4]]
@@ -224,7 +230,10 @@ def update_figure(selected_year, period):
         ),
         go.Scatter(
             y = df_norms[3]
-        )
+        ),
+        # go.Scatter(
+        #     y = df[3].max()
+        # )
     ]
     layout = go.Layout(
             xaxis = {'rangeslider': {'visible':True},},

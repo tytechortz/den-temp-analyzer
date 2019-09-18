@@ -299,32 +299,3 @@ app.layout = html.Div(body)
 
 if __name__ == "__main__":
     app.run_server(port=8050, debug=False)
-
-
-# def getRecordTemp(month, day):
-#     try:
-#         connection = psycopg2.connect(user = "postgres",
-#                                     password = "1234",
-#                                     host = "localhost",
-#                                     database = "denver_temps")
-#         cursor = connection.cursor()
-#         postgreSQL_select_Query = 'SELECT ("TMAX"), "DATE" FROM temps WHERE EXTRACT(month FROM "DATE"::TIMESTAMP) = {} AND EXTRACT(day FROM "DATE"::TIMESTAMP) = {} GROUP BY "TMAX", "DATE"'.format(month, day) 
-
-#         cursor.execute(postgreSQL_select_Query)
-#         print("Selecting rows from temps using fetchone")
-#         temp_records = cursor.fetchall()
-
-#         print("Print each row and it's columns values")
-#         print(temp_records[0])
-            
-#     except (Exception, psycopg2.Error) as error :
-#         print ("Error while fetching data from PostgreSQL", error)
-    
-#     finally:
-#         #closing database connection.
-#         if(connection):
-#             cursor.close()
-#             connection.close()
-#             print("PostgreSQL connection is closed")
-
-# getRecordTemp(2, 2)

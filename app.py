@@ -232,9 +232,9 @@ def update_figure(selected_year, period):
         temps = df.iloc[59:155, 5]
         data_period = df.iloc[59:155, 2]
         rec_highs = df_record_highs[0].iloc[59:155]
-        rec_lows = df_record_lows[0]
-        high_norms = df_norms[4]
-        low_norms = df_norms[3]
+        rec_lows = df_record_lows[0].iloc[59:155]
+        high_norms = df_norms[4].iloc[59:155]
+        low_norms = df_norms[3].iloc[59:155]
      
     if int(selected_year) % 4 == 0:
         print("leap year")

@@ -222,6 +222,7 @@ def update_figure(selected_year, period):
 
     if period == 'annual':
         temps = df[5]
+        base = df[4]
         print(temps)
         data_period = df[3]
         rec_highs = df_record_highs[0]
@@ -229,7 +230,8 @@ def update_figure(selected_year, period):
         high_norms = df_norms[4]
         low_norms = df_norms[3]
     elif period == 'spring':
-        temps = df.iloc[59:155, 5]
+        temps = df[5].iloc[59:155]
+        base = df[4].iloc[59:155]
         data_period = df.iloc[59:155, 2]
         rec_highs = df_record_highs[0].iloc[59:155]
         rec_lows = df_record_lows[0].iloc[59:155]
@@ -265,7 +267,7 @@ def update_figure(selected_year, period):
             go.Bar(
                 y = temps,
                 # x = data_period,
-                base = df[4],
+                base = base,
                 marker = {'color':'blue'},
                 hovertemplate = "<b>STUFF</b>"
             ),

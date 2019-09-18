@@ -241,6 +241,9 @@ def update_figure(selected_year, period):
         ),
         go.Scatter(
             y = df_record_highs_ly[0]
+        ),
+        go.Scatter(
+            y = df_record_lows_ly[0]
         )
     ]
     layout = go.Layout(

@@ -198,14 +198,14 @@ def update_figure(selected_year, period):
 
         df = pd.DataFrame(temp_records)
         df[5] = df[3] - df[4]
-        print(df)
+        # print(df)
         df_norms = pd.DataFrame(norms)
-        df_record_highs = pd.DataFrame(rec_highs)
-        df_record_lows = pd.DataFrame(rec_lows)
-        print(df_record_lows)
-        df_record_highs_ly = df_record_highs.drop(60)
-        df_record_lows_ly = df_record_lows.drop(60)
-        
+        df_record_highs_ly = pd.DataFrame(rec_highs)
+        df_record_lows_ly = pd.DataFrame(rec_lows)
+        # print(df_record_lows)
+        df_record_highs = df_record_highs_ly.drop(60)
+        df_record_lows = df_record_lows_ly.drop(60)
+        print(df.shape)
 
         # df_avgs = postgreSQL_select_normal_high_Query
     except (Exception, psycopg2.Error) as error :
@@ -224,34 +224,80 @@ def update_figure(selected_year, period):
         # print(df_norms[3])
     # elif period == 'spring':
 
-    norm_traces = [df_norms[3], df_norms[4]]
+    # norm_traces = [df_norms[3], df_norms[4]]
 
-    trace = [
-        go.Bar(
-            y = data_period,
-            base = df[4],
-            marker = {'color':'dodgerblue'},
-            hovertemplate = "<b>STUFF</b>"
-        ),
-        go.Scatter(
-            y = df_norms[4],
-        ),
-        go.Scatter(
-            y = df_norms[3]
-        ),
-        go.Scatter(
-            y = df_record_highs_ly[0]
-        ),
-        go.Scatter(
-            y = df_record_lows_ly[0]
-        )
-    ]
+    # traces = []
+
+    # trace = [
+    #     go.Bar(
+    #         y = data_period,
+    #         base = df[4],
+    #         marker = {'color':'dodgerblue'},
+    #         hovertemplate = "<b>STUFF</b>"
+    #     ),
+    #     go.Scatter(
+    #         y = df_norms[4],
+    #     ),
+    #     go.Scatter(
+    #         y = df_norms[3]
+    #     ),
+    #     go.Scatter(
+    #         y = df_record_highs_ly[0]
+    #     ),
+    # ]
+
+    if int(selected_year) % 4 == 0:
+        print("leap year")
+        trace = [
+            go.Bar(
+                y = data_period,
+                base = df[4],
+                marker = {'color':'dodgerblue'},
+                hovertemplate = "<b>STUFF</b>"
+            ),
+            go.Scatter(
+                y = df_norms[4],
+            ),
+            go.Scatter(
+                y = df_norms[3]
+            ),
+            go.Scatter(
+                y = df_record_highs_ly[0]
+            ),
+            go.Scatter(
+                y = df_record_lows_ly[0]
+            ),
+        ]
+    else:
+        print("non leap year")
+        trace = [
+            go.Bar(
+                y = data_period,
+                base = df[4],
+                marker = {'color':'blue'},
+                hovertemplate = "<b>STUFF</b>"
+            ),
+            go.Scatter(
+                y = df_norms[4],
+            ),
+            go.Scatter(
+                y = df_norms[3]
+            ),
+            go.Scatter(
+                y = df_record_highs[0]
+            ),
+            go.Scatter(
+                y = df_record_lows[0]
+            ),
+        ]
+    # print(trace)
+
     layout = go.Layout(
-            xaxis = {'rangeslider': {'visible':True},},
-            yaxis = {"title": 'Temperature F'},
-            title ='Daily Temps',
-            plot_bgcolor = 'lightgray',
-            height = 700,
+                xaxis = {'rangeslider': {'visible':True},},
+                yaxis = {"title": 'Temperature F'},
+                title ='Daily Temps',
+                plot_bgcolor = 'lightgray',
+                height = 700,
         )
     return {'data': trace, 'layout': layout}
 

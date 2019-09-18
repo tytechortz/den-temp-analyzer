@@ -192,13 +192,19 @@ def update_figure(selected_year, period):
         cursor.execute(postgreSQL_select_record_high_Query)
         rec_highs = cursor.fetchall()
 
+        postgreSQL_select_record_low_Query = 'SELECT min(ALL "TMIN") AS rec_low, to_char("DATE"::TIMESTAMP,\'MM-DD\') AS day FROM temps GROUP BY day ORDER BY day ASC'
+        cursor.execute(postgreSQL_select_record_low_Query)
+        rec_lows = cursor.fetchall()
+
         df = pd.DataFrame(temp_records)
         df[5] = df[3] - df[4]
         print(df)
         df_norms = pd.DataFrame(norms)
         df_record_highs = pd.DataFrame(rec_highs)
-        print(df_record_highs)
+        df_record_lows = pd.DataFrame(rec_lows)
+        print(df_record_lows)
         df_record_highs_ly = df_record_highs.drop(60)
+        df_record_lows_ly = df_record_lows.drop(60)
         
 
         # df_avgs = postgreSQL_select_normal_high_Query

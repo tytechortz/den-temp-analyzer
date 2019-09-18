@@ -198,7 +198,8 @@ def update_figure(selected_year, period):
 
         df = pd.DataFrame(temp_records)
         df[5] = df[3] - df[4]
-        # print(df)
+        print(df)
+        print(df[5])
         df_norms = pd.DataFrame(norms)
         df_record_highs_ly = pd.DataFrame(rec_highs)
         df_record_lows_ly = pd.DataFrame(rec_lows)
@@ -220,46 +221,36 @@ def update_figure(selected_year, period):
 
 
     if period == 'annual':
-        data_period = df[5]
-        # print(df_norms[3])
-    # elif period == 'spring':
-
-    # norm_traces = [df_norms[3], df_norms[4]]
-
-    # traces = []
-
-    # trace = [
-    #     go.Bar(
-    #         y = data_period,
-    #         base = df[4],
-    #         marker = {'color':'dodgerblue'},
-    #         hovertemplate = "<b>STUFF</b>"
-    #     ),
-    #     go.Scatter(
-    #         y = df_norms[4],
-    #     ),
-    #     go.Scatter(
-    #         y = df_norms[3]
-    #     ),
-    #     go.Scatter(
-    #         y = df_record_highs_ly[0]
-    #     ),
-    # ]
-
+        temps = df[5]
+        print(temps)
+        data_period = df[3]
+        rec_highs = df_record_highs[0]
+        rec_lows = df_record_lows[0]
+        high_norms = df_norms[4]
+        low_norms = df_norms[3]
+    elif period == 'spring':
+        temps = df.iloc[59:155, 5]
+        data_period = df.iloc[59:155, 2]
+        rec_highs = df_record_highs[0].iloc[59:155]
+        rec_lows = df_record_lows[0]
+        high_norms = df_norms[4]
+        low_norms = df_norms[3]
+     
     if int(selected_year) % 4 == 0:
         print("leap year")
         trace = [
             go.Bar(
-                y = data_period,
+                y = temps,
+                # x = data_period,
                 base = df[4],
                 marker = {'color':'dodgerblue'},
                 hovertemplate = "<b>STUFF</b>"
             ),
             go.Scatter(
-                y = df_norms[4],
+                y = high_norms,
             ),
             go.Scatter(
-                y = df_norms[3]
+                y = low_norms
             ),
             go.Scatter(
                 y = df_record_highs_ly[0]
@@ -272,22 +263,23 @@ def update_figure(selected_year, period):
         print("non leap year")
         trace = [
             go.Bar(
-                y = data_period,
+                y = temps,
+                # x = data_period,
                 base = df[4],
                 marker = {'color':'blue'},
                 hovertemplate = "<b>STUFF</b>"
             ),
             go.Scatter(
-                y = df_norms[4],
+                y = high_norms,
             ),
             go.Scatter(
-                y = df_norms[3]
+                y = low_norms
             ),
             go.Scatter(
-                y = df_record_highs[0]
+                y = rec_highs
             ),
             go.Scatter(
-                y = df_record_lows[0]
+                y = rec_lows
             ),
         ]
     # print(trace)

@@ -176,6 +176,34 @@ def all_temps(selected_year):
         cursor.execute(postgreSQL_select_record_high_Query)
         rec_highs = cursor.fetchall()
         df_rec_high = pd.DataFrame(rec_highs)
+
+    except (Exception, psycopg2.Error) as error :
+        print ("Error while fetching data from PostgreSQL", error)
+    
+    finally:
+        #closing database connection.
+        if(connection):
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+    return df_rec_high.to_json()
+
+    
+@app.callback(Output('rec-lows', 'children'),
+             [Input('year', 'value')])
+def all_temps(selected_year):
+    try:
+        connection = psycopg2.connect(user = "postgres",
+                                    password = "1234",
+                                    host = "localhost",
+                                    database = "denver_temps")
+
+        cursor = connection.cursor()
+
+        postgreSQL_select_record_low_Query = 'SELECT min(ALL "TMIN") AS rec_low, to_char("DATE"::TIMESTAMP,\'MM-DD\') AS day FROM temps GROUP BY day ORDER BY day ASC'
+        cursor.execute(postgreSQL_select_record_low_Query)
+        rec_lows = cursor.fetchall()
+        df_rec_low = pd.DataFrame(rec_lows)
         
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
@@ -187,22 +215,20 @@ def all_temps(selected_year):
             connection.close()
             print("PostgreSQL connection is closed")
 
-    return df_rec_high.to_json()
-
-    
-
-
+    return df_rec_low.to_json()
 
 
 @app.callback(Output('graph1', 'figure'),
              [Input('temp-data', 'children'),
              Input('rec-highs', 'children'),
+             Input('rec-lows', 'children'),
              Input('period', 'value')])
-def update_figure(temp_data, rec_highs, period):
+def update_figure(temp_data, rec_highs,rec_lows, period):
     temps = pd.read_json(temp_data)
     temps[5] = temps[3] - temps[4]
     df_record_highs_ly = pd.read_json(rec_highs)
-    print(temps)
+    df_record_lows_ly = pd.read_json(rec_lows)
+    print(df_record_lows_ly)
     trace = [
             go.Bar(
                 y = temps[5],
@@ -220,9 +246,9 @@ def update_figure(temp_data, rec_highs, period):
             go.Scatter(
                 y = df_record_highs_ly[0]
             ),
-            # go.Scatter(
-            #     y = df_record_lows_ly[0]
-            # ),
+            go.Scatter(
+                y = df_record_lows_ly[0]
+            ),
         ]
     layout = go.Layout(
                 xaxis = {'rangeslider': {'visible':True},},

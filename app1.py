@@ -126,6 +126,8 @@ finally:
 
 df_norms = pd.DataFrame(norms)
 print(df_norms.head())
+high_norms = df_norms[4]
+low_norms = df_norms[3]
 
 @app.callback(Output('temp-data', 'children'),
              [Input('year', 'value'),
@@ -172,12 +174,12 @@ def update_figure(temp_data, period):
                 marker = {'color':'dodgerblue'},
                 hovertemplate = "<b>STUFF</b>"
             ),
-            # go.Scatter(
-            #     y = high_norms,
-            # ),
-            # go.Scatter(
-            #     y = low_norms
-            # ),
+            go.Scatter(
+                y = high_norms,
+            ),
+            go.Scatter(
+                y = low_norms
+            ),
             # go.Scatter(
             #     y = df_record_highs_ly[0]
             # ),

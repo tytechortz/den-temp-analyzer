@@ -24,6 +24,11 @@ today = time.strftime("%Y-%m-%d")
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
+
+
+
+
+
 body = dbc.Container([
     dbc.Row([
         dbc.Col(
@@ -98,10 +103,34 @@ body = dbc.Container([
     html.Div(id='temp-data', style={'display': 'none'})
 ])
 
+try:
+        connection = psycopg2.connect(user = "postgres",
+                                    password = "1234",
+                                    host = "localhost",
+                                    database = "denver_temps")
+
+        cursor = connection.cursor()
+
+        postgreSQL_select_norms_Query = 'SELECT * FROM dly_max_norm'
+        cursor.execute(postgreSQL_select_norms_Query)
+        norms = cursor.fetchall()
+except (Exception, psycopg2.Error) as error :
+        print ("Error while fetching data from PostgreSQL", error)
+    
+finally:
+    #closing database connection.
+    if(connection):
+        cursor.close()
+        connection.close()
+        print("PostgreSQL connection is closed")
+
+df_norms = pd.DataFrame(norms)
+print(df_norms.head())
+
 @app.callback(Output('temp-data', 'children'),
              [Input('year', 'value'),
              Input('period', 'value')])
-def update_data(selected_year, period):
+def all_temps(selected_year, period):
     
     try:
         connection = psycopg2.connect(user = "postgres",

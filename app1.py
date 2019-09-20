@@ -25,7 +25,10 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
 
-
+connection = psycopg2.connect(user = "postgres",
+                                    password = "1234",
+                                    host = "localhost",
+                                    database = "denver_temps")
 
 
 
@@ -137,11 +140,7 @@ low_norms = df_norms[3]
 def all_temps(selected_year, period):
     
     try:
-        connection = psycopg2.connect(user = "postgres",
-                                    password = "1234",
-                                    host = "localhost",
-                                    database = "denver_temps")
-
+        connection 
         cursor = connection.cursor()
 
         postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) = {}'.format(selected_year)
@@ -232,10 +231,10 @@ def update_figure(temp_data, rec_highs,rec_lows, selected_year, period):
     df_record_highs_ry = df_record_highs_ly.drop(df_record_highs_ly.index[0])
     if int(selected_year) % 4 != 0:
         df_record_highs = df_record_highs_ly.drop(df_record_highs_ly.index[59])
-        # df_record_lows = df_record_lows.drop(df_record_lows.index[60])
+        df_record_lows = df_record_lows_ly.drop(df_record_lows_ly.index[60])
     else:
         df_record_highs = df_record_highs_ly
-        # df_record_lows = df_record_lows
+        df_record_lows = df_record_lows_ly
         
     
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
@@ -257,9 +256,9 @@ def update_figure(temp_data, rec_highs,rec_lows, selected_year, period):
             go.Scatter(
                 y = df_record_highs[0]
             ),
-            # go.Scatter(
-            #     y = df_record_lows[0]
-            # ),
+            go.Scatter(
+                y = df_record_lows[0]
+            ),
         ]
     layout = go.Layout(
                 xaxis = {'rangeslider': {'visible':True},},

@@ -1,5 +1,6 @@
 import psycopg2
 from psycopg2 import pool
+# import app1.py
 
 try:
 
@@ -21,9 +22,9 @@ try:
         ps_cursor.execute("select * from dly_max_norm")
         norm_records = ps_cursor.fetchall()
 
-        print ("Displaying rows from mobile table")
-        for row in norm_records:
-            print (row)
+        # print ("Displaying rows from mobile table")
+        # for row in norm_records:
+        #     print (row)
 
         ps_cursor.close()
 

@@ -14,9 +14,12 @@ from scipy.stats import norm
 from numpy import arange,array,ones 
 import dash_table 
 import psycopg2
+from psycopg2 import pool
 import operator
 from dash.exceptions import PreventUpdate
 import json
+# import conect
+from conect import norm_records
 
 current_year = datetime.now().year
 today = time.strftime("%Y-%m-%d")
@@ -24,13 +27,8 @@ today = time.strftime("%Y-%m-%d")
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
-
-connection = psycopg2.connect(user = "postgres",
-                                    password = "1234",
-                                    host = "localhost",
-                                    database = "denver_temps")
-
-
+df_norms = pd.DataFrame(norm_records)
+# print(norm_records)
 
 body = dbc.Container([
     dbc.Row([
@@ -105,34 +103,12 @@ body = dbc.Container([
     ]),
     html.Div(id='temp-data', style={'display': 'none'}),
     html.Div(id='rec-highs', style={'display': 'none'}),
-    html.Div(id='rec-lows', style={'display': 'none'})
+    html.Div(id='rec-lows', style={'display': 'none'}),
+    html.Div(id='high-norms', style={'display': 'none'}),
+    html.Div(id='low-norms', style={'display': 'none'}),
 ])
 
-try:
-        connection = psycopg2.connect(user = "postgres",
-                                    password = "1234",
-                                    host = "localhost",
-                                    database = "denver_temps")
 
-        cursor = connection.cursor()
-
-        postgreSQL_select_norms_Query = 'SELECT * FROM dly_max_norm'
-        cursor.execute(postgreSQL_select_norms_Query)
-        norms = cursor.fetchall()
-except (Exception, psycopg2.Error) as error :
-        print ("Error while fetching data from PostgreSQL", error)
-    
-finally:
-    #closing database connection.
-    if(connection):
-        cursor.close()
-        connection.close()
-        print("PostgreSQL connection is closed")
-
-df_norms = pd.DataFrame(norms)
-print(df_norms.head())
-high_norms = df_norms[4]
-low_norms = df_norms[3]
 
 @app.callback(Output('temp-data', 'children'),
              [Input('year', 'value'),
@@ -140,7 +116,11 @@ low_norms = df_norms[3]
 def all_temps(selected_year, period):
     
     try:
-        connection 
+        connection = psycopg2.connect(user = "postgres",
+                                    password = "1234",
+                                    host = "localhost",
+                                    database = "denver_temps")
+
         cursor = connection.cursor()
 
         postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) = {}'.format(selected_year)
@@ -216,29 +196,56 @@ def all_temps(selected_year):
 
     return df_rec_low.to_json()
 
+@app.callback(Output('high-norms', 'children'),
+             [Input('year', 'value')])
+def norm_highs(selected_year):
+    if int(selected_year) % 4 == 0:
+        high_norms = df_norms[4]
+    else:
+        high_norms = df_norms[4].drop(df_norms.index[59])
+    return high_norms.to_json()
+
+@app.callback(Output('low-norms', 'children'),
+             [Input('year', 'value')])
+def norm_lows(selected_year):
+    if int(selected_year) % 4 == 0:
+        low_norms = df_norms[3]
+    else:
+        low_norms = df_norms[3].drop(df_norms.index[59])
+    return low_norms.to_json()
+
 
 @app.callback(Output('graph1', 'figure'),
              [Input('temp-data', 'children'),
              Input('rec-highs', 'children'),
              Input('rec-lows', 'children'),
+             Input('high-norms', 'children'),
+             Input('low-norms', 'children'),
              Input('year', 'value'),
              Input('period', 'value')])
-def update_figure(temp_data, rec_highs,rec_lows, selected_year, period):
+def update_figure(temp_data, rec_highs, rec_lows, high_norms, low_norms, selected_year, period):
     temps = pd.read_json(temp_data)
     temps[5] = temps[3] - temps[4]
     df_record_highs_ly = pd.read_json(rec_highs)
     df_record_lows_ly = pd.read_json(rec_lows)
-    df_record_highs_ry = df_record_highs_ly.drop(df_record_highs_ly.index[0])
+    df_high_norms = pd.read_json(high_norms, typ='series')
+    df_low_norms = pd.read_json(low_norms, typ='series')
+    # df_record_highs_ry = df_record_highs_ly.drop(df_record_highs_ly.index[])
+
+    # high_norms = df_norms[4]
+    # low_norms = df_norms[3]
+    
     if int(selected_year) % 4 != 0:
         df_record_highs = df_record_highs_ly.drop(df_record_highs_ly.index[59])
-        df_record_lows = df_record_lows_ly.drop(df_record_lows_ly.index[60])
+        df_record_lows = df_record_lows_ly.drop(df_record_lows_ly.index[59])
+        
     else:
         df_record_highs = df_record_highs_ly
         df_record_lows = df_record_lows_ly
         
     
-    with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
-        print(df_record_highs)
+    # with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+    #     print(df_record_highs)
     trace = [
             go.Bar(
                 y = temps[5],
@@ -247,12 +254,12 @@ def update_figure(temp_data, rec_highs,rec_lows, selected_year, period):
                 marker = {'color':'dodgerblue'},
                 hovertemplate = "<b>STUFF</b>"
             ),
-            # go.Scatter(
-            #     y = high_norms,
-            # ),
-            # go.Scatter(
-            #     y = low_norms
-            # ),
+            go.Scatter(
+                y = df_high_norms,
+            ),
+            go.Scatter(
+                y = df_low_norms
+            ),
             go.Scatter(
                 y = df_record_highs[0]
             ),

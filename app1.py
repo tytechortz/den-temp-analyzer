@@ -222,13 +222,24 @@ def all_temps(selected_year):
              [Input('temp-data', 'children'),
              Input('rec-highs', 'children'),
              Input('rec-lows', 'children'),
+             Input('year', 'value'),
              Input('period', 'value')])
-def update_figure(temp_data, rec_highs,rec_lows, period):
+def update_figure(temp_data, rec_highs,rec_lows, selected_year, period):
     temps = pd.read_json(temp_data)
     temps[5] = temps[3] - temps[4]
     df_record_highs_ly = pd.read_json(rec_highs)
     df_record_lows_ly = pd.read_json(rec_lows)
-    print(df_record_lows_ly)
+    df_record_highs_ry = df_record_highs_ly.drop(df_record_highs_ly.index[0])
+    if int(selected_year) % 4 != 0:
+        df_record_highs = df_record_highs_ly.drop(df_record_highs_ly.index[59])
+        # df_record_lows = df_record_lows.drop(df_record_lows.index[60])
+    else:
+        df_record_highs = df_record_highs_ly
+        # df_record_lows = df_record_lows
+        
+    
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+        print(df_record_highs)
     trace = [
             go.Bar(
                 y = temps[5],
@@ -237,18 +248,18 @@ def update_figure(temp_data, rec_highs,rec_lows, period):
                 marker = {'color':'dodgerblue'},
                 hovertemplate = "<b>STUFF</b>"
             ),
+            # go.Scatter(
+            #     y = high_norms,
+            # ),
+            # go.Scatter(
+            #     y = low_norms
+            # ),
             go.Scatter(
-                y = high_norms,
+                y = df_record_highs[0]
             ),
-            go.Scatter(
-                y = low_norms
-            ),
-            go.Scatter(
-                y = df_record_highs_ly[0]
-            ),
-            go.Scatter(
-                y = df_record_lows_ly[0]
-            ),
+            # go.Scatter(
+            #     y = df_record_lows[0]
+            # ),
         ]
     layout = go.Layout(
                 xaxis = {'rangeslider': {'visible':True},},

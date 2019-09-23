@@ -19,7 +19,9 @@ import operator
 from dash.exceptions import PreventUpdate
 import json
 # import conect
-from conect import norm_records, temp_records
+from conect import norm_records, rec_lows, rec_highs
+# from conect import rec_lows
+ 
 
 current_year = datetime.now().year
 today = time.strftime("%Y-%m-%d")
@@ -30,8 +32,11 @@ app.config['suppress_callback_exceptions']=True
 df_norms = pd.DataFrame(norm_records)
 print(df_norms)
 
-df_temps = pd.DataFrame(temp_records)
-print(df_temps)
+df_rec_lows = pd.DataFrame(rec_lows)
+print(df_rec_lows)
+
+df_rec_highs = pd.DataFrame(rec_highs)
+print(df_rec_highs)
 
 body = dbc.Container([
     dbc.Row([
@@ -112,7 +117,6 @@ body = dbc.Container([
 ])
 
 
-
 @app.callback(Output('temp-data', 'children'),
              [Input('year', 'value'),
              Input('period', 'value')])
@@ -146,6 +150,8 @@ def all_temps(selected_year, period):
 @app.callback(Output('rec-highs', 'children'),
              [Input('year', 'value')])
 def all_temps(selected_year):
+
+
     try:
         connection = psycopg2.connect(user = "postgres",
                                     password = "1234",
@@ -174,30 +180,32 @@ def all_temps(selected_year):
 @app.callback(Output('rec-lows', 'children'),
              [Input('year', 'value')])
 def all_temps(selected_year):
-    try:
-        connection = psycopg2.connect(user = "postgres",
-                                    password = "1234",
-                                    host = "localhost",
-                                    database = "denver_temps")
 
-        cursor = connection.cursor()
 
-        postgreSQL_select_record_low_Query = 'SELECT min(ALL "TMIN") AS rec_low, to_char("DATE"::TIMESTAMP,\'MM-DD\') AS day FROM temps GROUP BY day ORDER BY day ASC'
-        cursor.execute(postgreSQL_select_record_low_Query)
-        rec_lows = cursor.fetchall()
-        df_rec_low = pd.DataFrame(rec_lows)
+    # try:
+    #     connection = psycopg2.connect(user = "postgres",
+    #                                 password = "1234",
+    #                                 host = "localhost",
+    #                                 database = "denver_temps")
+
+    #     cursor = connection.cursor()
+
+    #     postgreSQL_select_record_low_Query = 'SELECT min(ALL "TMIN") AS rec_low, to_char("DATE"::TIMESTAMP,\'MM-DD\') AS day FROM temps GROUP BY day ORDER BY day ASC'
+    #     cursor.execute(postgreSQL_select_record_low_Query)
+    #     rec_lows = cursor.fetchall()
+    #     df_rec_low = pd.DataFrame(rec_lows)
         
-    except (Exception, psycopg2.Error) as error :
-        print ("Error while fetching data from PostgreSQL", error)
+    # except (Exception, psycopg2.Error) as error :
+    #     print ("Error while fetching data from PostgreSQL", error)
     
-    finally:
-        #closing database connection.
-        if(connection):
-            cursor.close()
-            connection.close()
-            print("PostgreSQL connection is closed")
+    # finally:
+    #     #closing database connection.
+    #     if(connection):
+    #         cursor.close()
+    #         connection.close()
+    #         print("PostgreSQL connection is closed")
 
-    return df_rec_low.to_json()
+    return df_rec_lows.to_json()
 
 @app.callback(Output('high-norms', 'children'),
              [Input('year', 'value')])

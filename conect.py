@@ -14,23 +14,25 @@ try:
 
 
  # Use getconn() to Get Connection from connection pool
-    ps_connection  = postgreSQL_pool.getconn()
+    norms_connection  = postgreSQL_pool.getconn()
+    temps_connection = postgreSQL_pool.getconn()
 
-    if(ps_connection):
+    if(norms_connection):
         print("successfully recived connection from connection pool ")
-        ps_cursor = ps_connection.cursor()
-        ps_cursor.execute("select * from dly_max_norm")
-        norm_records = ps_cursor.fetchall()
+        norms_cursor = norms_connection.cursor()
+        norms_cursor.execute("select * from dly_max_norm")
+        norm_records = norms_cursor.fetchall()
+        norms_cursor.close()
 
-        # print ("Displaying rows from mobile table")
-        # for row in norm_records:
-        #     print (row)
-
-        ps_cursor.close()
+        temps_cursor = temps_connection.cursor()
+        temps_cursor.execute('SELECT min(ALL "TMIN") AS rec_low, to_char("DATE"::TIMESTAMP,\'MM-DD\') AS day FROM temps GROUP BY day ORDER BY day ASC')
+        temp_records = temps_cursor.fetchall()
+        temps_cursor.close()  
 
         #Use this method to release the connection object and send back to connection pool
-        postgreSQL_pool.putconn(ps_connection)
         print("Put away a PostgreSQL connection")
+        postgreSQL_pool.putconn(norms_connection)
+        postgreSQL_pool.putconn(temps_connection)
 
 except (Exception, psycopg2.DatabaseError) as error :
     print ("Error while connecting to PostgreSQL", error)

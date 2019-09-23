@@ -19,7 +19,7 @@ import operator
 from dash.exceptions import PreventUpdate
 import json
 # import conect
-from conect import norm_records
+from conect import norm_records, temp_records
 
 current_year = datetime.now().year
 today = time.strftime("%Y-%m-%d")
@@ -28,7 +28,10 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
 df_norms = pd.DataFrame(norm_records)
-# print(norm_records)
+print(df_norms)
+
+df_temps = pd.DataFrame(temp_records)
+print(df_temps)
 
 body = dbc.Container([
     dbc.Row([

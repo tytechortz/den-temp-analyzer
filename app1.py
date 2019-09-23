@@ -150,61 +150,11 @@ def all_temps(selected_year, period):
 @app.callback(Output('rec-highs', 'children'),
              [Input('year', 'value')])
 def all_temps(selected_year):
+    return df_rec_highs.to_json()
 
-
-    try:
-        connection = psycopg2.connect(user = "postgres",
-                                    password = "1234",
-                                    host = "localhost",
-                                    database = "denver_temps")
-
-        cursor = connection.cursor()
-
-        postgreSQL_select_record_high_Query = 'SELECT max(ALL "TMAX") AS rec_high, to_char("DATE"::TIMESTAMP,\'MM-DD\') AS day FROM temps GROUP BY day ORDER BY day ASC'
-        cursor.execute(postgreSQL_select_record_high_Query)
-        rec_highs = cursor.fetchall()
-        df_rec_high = pd.DataFrame(rec_highs)
-
-    except (Exception, psycopg2.Error) as error :
-        print ("Error while fetching data from PostgreSQL", error)
-    
-    finally:
-        #closing database connection.
-        if(connection):
-            cursor.close()
-            connection.close()
-            print("PostgreSQL connection is closed")
-    return df_rec_high.to_json()
-
-    
 @app.callback(Output('rec-lows', 'children'),
              [Input('year', 'value')])
 def all_temps(selected_year):
-
-
-    # try:
-    #     connection = psycopg2.connect(user = "postgres",
-    #                                 password = "1234",
-    #                                 host = "localhost",
-    #                                 database = "denver_temps")
-
-    #     cursor = connection.cursor()
-
-    #     postgreSQL_select_record_low_Query = 'SELECT min(ALL "TMIN") AS rec_low, to_char("DATE"::TIMESTAMP,\'MM-DD\') AS day FROM temps GROUP BY day ORDER BY day ASC'
-    #     cursor.execute(postgreSQL_select_record_low_Query)
-    #     rec_lows = cursor.fetchall()
-    #     df_rec_low = pd.DataFrame(rec_lows)
-        
-    # except (Exception, psycopg2.Error) as error :
-    #     print ("Error while fetching data from PostgreSQL", error)
-    
-    # finally:
-    #     #closing database connection.
-    #     if(connection):
-    #         cursor.close()
-    #         connection.close()
-    #         print("PostgreSQL connection is closed")
-
     return df_rec_lows.to_json()
 
 @app.callback(Output('high-norms', 'children'),

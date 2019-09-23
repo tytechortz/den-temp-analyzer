@@ -18,7 +18,7 @@ try:
     reclows_connection = postgreSQL_pool.getconn()
     rechighs_connection = postgreSQL_pool.getconn()
 
-    if(norms_connection, reclows_connection):
+    if(norms_connection):
         print("successfully recived connection from connection pool ")
         norms_cursor = norms_connection.cursor()
         norms_cursor.execute("select * from dly_max_norm")
@@ -30,8 +30,8 @@ try:
         rec_lows = rl_cursor.fetchall()
         rl_cursor.close()  
 
-        rh_cursor = rechighss_connection.cursor()
-        rh_cursor.execute('SELECT min(ALL "TMIN") AS rec_low, to_char("DATE"::TIMESTAMP,\'MM-DD\') AS day FROM temps GROUP BY day ORDER BY day ASC')
+        rh_cursor = rechighs_connection.cursor()
+        rh_cursor.execute('SELECT max(ALL "TMAX") AS rec_high, to_char("DATE"::TIMESTAMP,\'MM-DD\') AS day FROM temps GROUP BY day ORDER BY day ASC')
         rec_highs = rh_cursor.fetchall()
         rh_cursor.close()
 

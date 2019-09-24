@@ -182,14 +182,28 @@ def norm_lows(selected_year):
              Input('year', 'value'),
              Input('period', 'value')])
 def update_figure(temp_data, rec_highs, rec_lows, high_norms, low_norms, selected_year, period):
+    # spans = {'spring': [59,152], 'spring_ly': [60,153]}
+    # print(spans['spring'][0])
     temps = pd.read_json(temp_data)
-    # print(temps[2])
     temps[2] = pd.to_datetime(temps[2])
-    temps[6] = temps[2].dt.day_name()
     print(temps)
-    # days = temps['day_name']
-   
+    temps = temps.set_index(2)
+    print(temps)
+    temps[6] = temps.index.day_name()
     temps[5] = temps[3] - temps[4]
+    print(temps)
+    # span = [spans[period]]
+    if period == 'spring':
+        temps = temps[temps.index.month.isin([3,4,5])]
+    
+    # temps = pd.read_json(temp_data)
+    # temps = temps[spans['spring'][0][1]]
+        
+        
+        
+        
+
+        print(temps)
     df_record_highs_ly = pd.read_json(rec_highs)
     df_record_lows_ly = pd.read_json(rec_lows)
     df_high_norms = pd.read_json(high_norms, typ='series')
@@ -203,8 +217,6 @@ def update_figure(temp_data, rec_highs, rec_lows, high_norms, low_norms, selecte
         df_record_lows = df_record_lows_ly
         
     
-    # with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
-    #     print(df_record_highs)
     trace = [
             go.Bar(
                 y = temps[5],

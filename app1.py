@@ -19,7 +19,7 @@ import operator
 from dash.exceptions import PreventUpdate
 import json
 # import conect
-from conect import norm_records, rec_lows, rec_highs
+from conect import norm_records, rec_lows, rec_highs, all_temps
 # from conect import rec_lows
  
 
@@ -30,13 +30,19 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
 df_norms = pd.DataFrame(norm_records)
-print(df_norms)
+# print(df_norms)
 
 df_rec_lows = pd.DataFrame(rec_lows)
-print(df_rec_lows)
+# print(df_rec_lows)
 
 df_rec_highs = pd.DataFrame(rec_highs)
-print(df_rec_highs)
+# print(df_rec_highs)
+
+# df_all_temps = pd.DataFrame(all_temps)
+# df_all_temps[2] = pd.to_datetime(df_all_temps[2])
+# df_all_temps = df_all_temps.set_index([2])
+# # print(df_all_temps)
+
 
 body = dbc.Container([
     dbc.Row([
@@ -121,7 +127,6 @@ body = dbc.Container([
              [Input('year', 'value'),
              Input('period', 'value')])
 def all_temps(selected_year, period):
-    
     try:
         connection = psycopg2.connect(user = "postgres",
                                     password = "1234",
@@ -149,12 +154,12 @@ def all_temps(selected_year, period):
 
 @app.callback(Output('rec-highs', 'children'),
              [Input('year', 'value')])
-def all_temps(selected_year):
+def rec_high_temps(selected_year):
     return df_rec_highs.to_json()
 
 @app.callback(Output('rec-lows', 'children'),
              [Input('year', 'value')])
-def all_temps(selected_year):
+def rec_low_temps(selected_year):
     return df_rec_lows.to_json()
 
 @app.callback(Output('high-norms', 'children'),
@@ -175,7 +180,6 @@ def norm_lows(selected_year):
         low_norms = df_norms[3].drop(df_norms.index[59])
     return low_norms.to_json()
 
-
 @app.callback(Output('graph1', 'figure'),
              [Input('temp-data', 'children'),
              Input('rec-highs', 'children'),
@@ -186,6 +190,8 @@ def norm_lows(selected_year):
              Input('period', 'value')])
 def update_figure(temp_data, rec_highs, rec_lows, high_norms, low_norms, selected_year, period):
     temps = pd.read_json(temp_data)
+    # temps = df_all_temps[df_all_temps.index.year == selected_year]
+    # temps = temps.set_index[2]
     temps[5] = temps[3] - temps[4]
     df_record_highs_ly = pd.read_json(rec_highs)
     df_record_lows_ly = pd.read_json(rec_lows)

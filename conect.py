@@ -1,7 +1,9 @@
 import psycopg2
 from psycopg2 import pool
-# import app1.py
+# from app1 import selected_year
 
+
+# print(selected_year)
 try:
 
     postgreSQL_pool = psycopg2.pool.SimpleConnectionPool(1, 20,user = "postgres",
@@ -17,6 +19,7 @@ try:
     norms_connection  = postgreSQL_pool.getconn()
     reclows_connection = postgreSQL_pool.getconn()
     rechighs_connection = postgreSQL_pool.getconn()
+    temps_connection = postgreSQL_pool.getconn()
 
     if(norms_connection):
         print("successfully recived connection from connection pool ")
@@ -35,11 +38,17 @@ try:
         rec_highs = rh_cursor.fetchall()
         rh_cursor.close()
 
+        temps_cursor = temps_connection.cursor()
+        temps_cursor.execute('SELECT * FROM temps')
+        all_temps = temps_cursor.fetchall()
+        temps_cursor.close()
+
         #Use this method to release the connection object and send back to connection pool
         print("Put away a PostgreSQL connection")
         postgreSQL_pool.putconn(norms_connection)
         postgreSQL_pool.putconn(reclows_connection)
         postgreSQL_pool.putconn(rechighs_connection)
+        postgreSQL_pool.putconn(temps_connection)
 
 except (Exception, psycopg2.DatabaseError) as error :
     print ("Error while connecting to PostgreSQL", error)
@@ -50,3 +59,5 @@ finally:
     if (postgreSQL_pool):
         postgreSQL_pool.closeall
     print("PostgreSQL connection pool is closed")
+
+# print(year)

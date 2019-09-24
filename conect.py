@@ -38,7 +38,7 @@ try:
         rec_highs = rh_cursor.fetchall()
         rh_cursor.close()
 
-        temps_cursor = temps_connection.cursor()
+        temps_cursor = temps_connection.cursor() 
         temps_cursor.execute('SELECT * FROM temps')
         all_temps = temps_cursor.fetchall()
         temps_cursor.close()

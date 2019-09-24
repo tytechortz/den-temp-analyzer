@@ -35,6 +35,7 @@ df_norms = pd.DataFrame(norm_records)
 df_rec_lows = pd.DataFrame(rec_lows)
 
 df_rec_highs = pd.DataFrame(rec_highs)
+print(df_rec_highs)
 
 
 body = dbc.Container([
@@ -186,16 +187,23 @@ def update_figure(temp_data, rec_highs, rec_lows, high_norms, low_norms, selecte
     # print(spans['spring'][0])
     temps = pd.read_json(temp_data)
     temps[2] = pd.to_datetime(temps[2])
-    print(temps)
+    # print(temps)
     temps = temps.set_index(2)
-    print(temps)
+    # print(temps)
     temps[6] = temps.index.day_name()
     temps[5] = temps[3] - temps[4]
     print(temps)
+    df_record_highs_ly = pd.read_json(rec_highs)
+    df_record_highs_ly = df_record_highs_ly.set_index(1)
+    print(df_record_highs_ly)
+    df_record_lows_ly = pd.read_json(rec_lows)
+    df_high_norms = pd.read_json(high_norms, typ='series')
+    df_low_norms = pd.read_json(low_norms, typ='series')
     # span = [spans[period]]
     if period == 'spring':
         temps = temps[temps.index.month.isin([3,4,5])]
-    
+        # df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.month.isin[3,4,5]]
+        df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
     # temps = pd.read_json(temp_data)
     # temps = temps[spans['spring'][0][1]]
         
@@ -203,11 +211,8 @@ def update_figure(temp_data, rec_highs, rec_lows, high_norms, low_norms, selecte
         
         
 
-        print(temps)
-    df_record_highs_ly = pd.read_json(rec_highs)
-    df_record_lows_ly = pd.read_json(rec_lows)
-    df_high_norms = pd.read_json(high_norms, typ='series')
-    df_low_norms = pd.read_json(low_norms, typ='series')
+        print(df_record_highs_ly)
+    
     
     if int(selected_year) % 4 != 0:
         df_record_highs = df_record_highs_ly.drop(df_record_highs_ly.index[59])

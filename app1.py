@@ -210,25 +210,30 @@ def update_figure(temp_data, rec_highs, rec_lows, high_norms, low_norms, selecte
                 y = temps[5],
                 # x = data_period,
                 base = temps[4],
+                name='Temp Range',
                 marker = {'color':'dodgerblue'},
-                hovertemplate = '<b>%{temps[6]}</b>'
+                # hovertemplate = '%{y:.2f}<extra></extra>'
+                #                 '<br>%{df'
             ),
             go.Scatter(
                 y = df_high_norms,
-                hoverinfo='none'
-                
+                hoverinfo='none',
+                name='Normal High'
             ),
             go.Scatter(
                 y = df_low_norms,
-                hoverinfo='none'
+                hoverinfo='none',
+                name='Normal Low'
             ),
             go.Scatter(
                 y = df_record_highs[0],
-                hoverinfo='none'
+                hoverinfo='none',
+                name='Record High'
             ),
             go.Scatter(
                 y = df_record_lows[0],
-                hoverinfo='none'
+                hoverinfo='none',
+                name='Record Low'
             ),
         ]
     layout = go.Layout(

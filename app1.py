@@ -30,12 +30,12 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
 df_norms = pd.DataFrame(norm_records)
-# print(df_norms)
+print(df_norms)
 
 df_rec_lows = pd.DataFrame(rec_lows)
 
 df_rec_highs = pd.DataFrame(rec_highs)
-print(df_rec_highs)
+# print(df_rec_highs)
 
 
 body = dbc.Container([
@@ -112,8 +112,8 @@ body = dbc.Container([
     html.Div(id='temp-data', style={'display': 'none'}),
     html.Div(id='rec-highs', style={'display': 'none'}),
     html.Div(id='rec-lows', style={'display': 'none'}),
-    html.Div(id='high-norms', style={'display': 'none'}),
-    html.Div(id='low-norms', style={'display': 'none'}),
+    html.Div(id='norms', style={'display': 'none'}),
+    # html.Div(id='low-norms', style={'display': 'none'}),
 ])
 
 
@@ -156,33 +156,33 @@ def rec_high_temps(selected_year):
 def rec_low_temps(selected_year):
     return df_rec_lows.to_json()
 
-@app.callback(Output('high-norms', 'children'),
+@app.callback(Output('norms', 'children'),
              [Input('year', 'value')])
 def norm_highs(selected_year):
     if int(selected_year) % 4 == 0:
-        high_norms = df_norms[3]
+        norms = df_norms
     else:
-        high_norms = df_norms[3].drop(df_norms.index[59])
-    return high_norms.to_json()
+        norms = df_norms.drop(df_norms.index[59])
+    return norms.to_json()
 
-@app.callback(Output('low-norms', 'children'),
-             [Input('year', 'value')])
-def norm_lows(selected_year):
-    if int(selected_year) % 4 == 0:
-        low_norms = df_norms[4]
-    else:
-        low_norms = df_norms[4].drop(df_norms.index[59])
-    return low_norms.to_json()
+# @app.callback(Output('low-norms', 'children'),
+#              [Input('year', 'value')])
+# def norm_lows(selected_year):
+#     if int(selected_year) % 4 == 0:
+#         low_norms = df_norms[4]
+#     else:
+#         low_norms = df_norms[4].drop(df_norms.index[59])
+#     return low_norms.to_json()
 
 @app.callback(Output('graph1', 'figure'),
              [Input('temp-data', 'children'),
              Input('rec-highs', 'children'),
              Input('rec-lows', 'children'),
-             Input('high-norms', 'children'),
-             Input('low-norms', 'children'),
+             Input('norms', 'children'),
+            #  Input('low-norms', 'children'),
              Input('year', 'value'),
              Input('period', 'value')])
-def update_figure(temp_data, rec_highs, rec_lows, high_norms, low_norms, selected_year, period):
+def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     # spans = {'spring': [59,152], 'spring_ly': [60,153]}
     # print(spans['spring'][0])
     temps = pd.read_json(temp_data)
@@ -192,34 +192,36 @@ def update_figure(temp_data, rec_highs, rec_lows, high_norms, low_norms, selecte
     # print(temps)
     temps[6] = temps.index.day_name()
     temps[5] = temps[3] - temps[4]
-    print(temps)
+    # print(temps)
     df_record_highs_ly = pd.read_json(rec_highs)
     df_record_highs_ly = df_record_highs_ly.set_index(1)
-    print(df_record_highs_ly)
+    # print(df_record_highs_ly)
     df_record_lows_ly = pd.read_json(rec_lows)
     df_record_lows_ly = df_record_lows_ly.set_index(1)
-    df_high_norms = pd.read_json(high_norms, typ='series')
-    df_low_norms = pd.read_json(low_norms, typ='series')
+    df_norms = pd.read_json(norms)
+    print(df_norms)
+    # df_high_norms = df_high_norms.set_index(1)
+    # df_low_norms = pd.read_json(low_norms, typ='series')
     # span = [spans[period]]
     if period == 'spring':
         temps = temps[temps.index.month.isin([3,4,5])]
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
-    
+        df_high_norms = df_norms[3][59:152]
         
         
         
         
 
-        print(df_record_highs_ly)
+        # print(df_record_highs_ly)
     
     
-    if int(selected_year) % 4 != 0:
-        df_record_highs = df_record_highs_ly.drop(df_record_highs_ly.index[59])
-        df_record_lows = df_record_lows_ly.drop(df_record_lows_ly.index[59])
-    else:
-        df_record_highs = df_record_highs_ly
-        df_record_lows = df_record_lows_ly
+    # if int(selected_year) % 4 != 0:
+    #     df_record_highs = df_record_highs_ly.drop(df_record_highs_ly.index[59])
+    #     df_record_lows = df_record_lows_ly.drop(df_record_lows_ly.index[59])
+    # else:
+    #     df_record_highs = df_record_highs_ly
+    #     df_record_lows = df_record_lows_ly
         
     
     trace = [
@@ -234,22 +236,22 @@ def update_figure(temp_data, rec_highs, rec_lows, high_norms, low_norms, selecte
             ),
             go.Scatter(
                 y = df_high_norms,
-                hoverinfo='none',
+                # hoverinfo='none',
                 name='Normal High'
             ),
+            # go.Scatter(
+            #     y = df_low_norms,
+            #     hoverinfo='none',
+            #     name='Normal Low'
+            # ),
             go.Scatter(
-                y = df_low_norms,
-                hoverinfo='none',
-                name='Normal Low'
-            ),
-            go.Scatter(
-                y = df_record_highs[0],
-                hoverinfo='none',
+                y = df_record_highs_ly[0],
+                # hoverinfo='none',
                 name='Record High'
             ),
             go.Scatter(
-                y = df_record_lows[0],
-                hoverinfo='none',
+                y = df_record_lows_ly[0],
+                # hoverinfo='none',
                 name='Record Low'
             ),
         ]

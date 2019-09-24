@@ -208,6 +208,7 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
         df_high_norms = df_norms[3][59:152]
+        df_low_norms = df_norms[4][59:152]
         
         
         
@@ -239,11 +240,11 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
                 # hoverinfo='none',
                 name='Normal High'
             ),
-            # go.Scatter(
-            #     y = df_low_norms,
-            #     hoverinfo='none',
-            #     name='Normal Low'
-            # ),
+            go.Scatter(
+                y = df_low_norms,
+                # hoverinfo='none',
+                name='Normal Low'
+            ),
             go.Scatter(
                 y = df_record_highs_ly[0],
                 # hoverinfo='none',

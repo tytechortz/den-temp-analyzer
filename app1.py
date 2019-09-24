@@ -197,15 +197,15 @@ def update_figure(temp_data, rec_highs, rec_lows, high_norms, low_norms, selecte
     df_record_highs_ly = df_record_highs_ly.set_index(1)
     print(df_record_highs_ly)
     df_record_lows_ly = pd.read_json(rec_lows)
+    df_record_lows_ly = df_record_lows_ly.set_index(1)
     df_high_norms = pd.read_json(high_norms, typ='series')
     df_low_norms = pd.read_json(low_norms, typ='series')
     # span = [spans[period]]
     if period == 'spring':
         temps = temps[temps.index.month.isin([3,4,5])]
-        # df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.month.isin[3,4,5]]
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
-    # temps = pd.read_json(temp_data)
-    # temps = temps[spans['spring'][0][1]]
+        df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
+    
         
         
         

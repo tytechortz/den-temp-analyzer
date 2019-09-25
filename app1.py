@@ -257,6 +257,8 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     
     else:
         temps = temps_cy
+        df_high_norms = df_norms[3]
+        df_low_norms = df_norms[4]
 
        
     trace = [
@@ -269,16 +271,16 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
                 hovertemplate = 'Temp Range: %{y} - %{base}<extra></extra>'
                                 
             ),
-            # go.Scatter(
-            #     y = df_high_norms,
-            #     # hoverinfo='none',
-            #     name='Normal High'
-            # ),
-            # go.Scatter(
-            #     y = df_low_norms,
-            #     # hoverinfo='none',
-            #     name='Normal Low'
-            # ),
+            go.Scatter(
+                y = df_high_norms,
+                # hoverinfo='none',
+                name='Normal High'
+            ),
+            go.Scatter(
+                y = df_low_norms,
+                # hoverinfo='none',
+                name='Normal Low'
+            ),
             # go.Scatter(
             #     y = df_record_highs_ly[0],
             #     # hoverinfo='none',

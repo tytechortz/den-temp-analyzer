@@ -235,12 +235,15 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_high_norms = df_norms[3][243:335]
         df_low_norms = df_norms[4][243:335]
     elif period == 'winter':
-        temps = temps[temps.index.month.isin([12,1,2])]
+        temps_py = temps_py[temps_py.index.month.isin([12])]
+        temps_cy = temps_cy[temps_cy.index.month.isin([1,2])]
+        frames = [temps_py, temps_cy]
+        temps = pd.concat(frames)
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(01-)|(02-)|(12-)')]
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(01-)|(02-)|(12-)')]
         df_high_norms = df_norms[3][334:60]
         df_low_norms = df_norms[4][334:60]
-        # print(temps)
+        print(temps)
         
         
         

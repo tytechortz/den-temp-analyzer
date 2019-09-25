@@ -254,6 +254,10 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_low_norms_dec = df_norms[4][335:]
         low_norm_frames = [df_low_norms_dec, df_low_norms_jan_feb]
         df_low_norms = pd.concat(low_norm_frames)
+    
+    else:
+        temps = temps_cy
+
        
     trace = [
             go.Bar(
@@ -265,26 +269,26 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
                 hovertemplate = 'Temp Range: %{y} - %{base}<extra></extra>'
                                 
             ),
-            go.Scatter(
-                y = df_high_norms,
-                # hoverinfo='none',
-                name='Normal High'
-            ),
-            go.Scatter(
-                y = df_low_norms,
-                # hoverinfo='none',
-                name='Normal Low'
-            ),
-            go.Scatter(
-                y = df_record_highs_ly[0],
-                # hoverinfo='none',
-                name='Record High'
-            ),
-            go.Scatter(
-                y = df_record_lows_ly[0],
-                # hoverinfo='none',
-                name='Record Low'
-            ),
+            # go.Scatter(
+            #     y = df_high_norms,
+            #     # hoverinfo='none',
+            #     name='Normal High'
+            # ),
+            # go.Scatter(
+            #     y = df_low_norms,
+            #     # hoverinfo='none',
+            #     name='Normal Low'
+            # ),
+            # go.Scatter(
+            #     y = df_record_highs_ly[0],
+            #     # hoverinfo='none',
+            #     name='Record High'
+            # ),
+            # go.Scatter(
+            #     y = df_record_lows_ly[0],
+            #     # hoverinfo='none',
+            #     name='Record Low'
+            # ),
         ]
     layout = go.Layout(
                 xaxis = {'rangeslider': {'visible':True},},

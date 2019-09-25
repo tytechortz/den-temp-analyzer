@@ -138,6 +138,7 @@ def all_temps(selected_year, period):
         df = pd.DataFrame(temp_records)
         print(df)
         
+        
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
     
@@ -187,6 +188,7 @@ def norm_highs(selected_year):
              Input('year', 'value'),
              Input('period', 'value')])
 def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
+    previous_year = int(selected_year) - 1
     # spans = {'spring': [59,152], 'spring_ly': [60,153]}
     # print(spans['spring'][0])
     temps = pd.read_json(temp_data)
@@ -197,6 +199,10 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     temps[6] = temps.index.day_name()
     temps[5] = temps[3] - temps[4]
     # print(temps)
+    temps_cy = temps[temps.index.year.isin([selected_year])]
+    print(temps_cy)
+    temps_py = temps[temps.index.year.isin([previous_year])]
+    print(temps_py)
     df_record_highs_ly = pd.read_json(rec_highs)
     df_record_highs_ly = df_record_highs_ly.set_index(1)
     # print(df_record_highs_ly)
@@ -211,13 +217,13 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
 
         
     if period == 'spring':
-        temps = temps[temps.index.month.isin([3,4,5])]
+        temps = temps_cy[temps_cy.index.month.isin([3,4,5])]
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
         df_high_norms = df_norms[3][59:152]
         df_low_norms = df_norms[4][59:152]
     elif period == 'summer':
-        temps = temps[temps.index.month.isin([6,7,8])]
+        temps = temps_cy[temps_cy.index.month.isin([6,7,8])]
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(06-)|(07-)|(08-)')]
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(06-)|(07-)|(08-)')]
         df_high_norms = df_norms[3][151:244]
@@ -226,11 +232,15 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         temps = temps[temps.index.month.isin([9,10,11])]
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(09-)|(10-)|(11-)')]
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(09-)|(10-)|(11-)')]
-        df_high_norms = df_norms[3][244:335]
-        df_low_norms = df_norms[4][244:335]
+        df_high_norms = df_norms[3][243:335]
+        df_low_norms = df_norms[4][243:335]
     elif period == 'winter':
         temps = temps[temps.index.month.isin([12,1,2])]
-        print(temps)
+        df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(01-)|(02-)|(12-)')]
+        df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(01-)|(02-)|(12-)')]
+        df_high_norms = df_norms[3][334:60]
+        df_low_norms = df_norms[4][334:60]
+        # print(temps)
         
         
         

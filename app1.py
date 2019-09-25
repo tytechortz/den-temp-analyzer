@@ -121,9 +121,9 @@ body = dbc.Container([
              [Input('year', 'value'),
              Input('period', 'value')])
 def all_temps(selected_year, period):
-    print(type(selected_year))
+    # print(type(selected_year))
     previous_year = int(selected_year) - 1
-    print(previous_year)
+    # print(previous_year)
     try:
         connection = psycopg2.connect(user = "postgres",
                                     password = "1234",
@@ -136,7 +136,7 @@ def all_temps(selected_year, period):
         cursor.execute(postgreSQL_select_year_Query)
         temp_records = cursor.fetchall()
         df = pd.DataFrame(temp_records)
-        print(df)
+        # print(df)
         
         
     except (Exception, psycopg2.Error) as error :
@@ -200,22 +200,17 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     temps[5] = temps[3] - temps[4]
     # print(temps)
     temps_cy = temps[temps.index.year.isin([selected_year])]
-    print(temps_cy)
+    # print(temps_cy)
     temps_py = temps[temps.index.year.isin([previous_year])]
-    print(temps_py)
+    # print(temps_py)
     df_record_highs_ly = pd.read_json(rec_highs)
     df_record_highs_ly = df_record_highs_ly.set_index(1)
     # print(df_record_highs_ly)
     df_record_lows_ly = pd.read_json(rec_lows)
     df_record_lows_ly = df_record_lows_ly.set_index(1)
     df_norms = pd.read_json(norms)
-    # print(df_norms)
-    # df_high_norms = df_high_norms.set_index(1)
-    # df_low_norms = pd.read_json(low_norms, typ='series')
-    # span = [spans[period]]
-    # if period == 'winter':
-
-        
+  
+  
     if period == 'spring':
         temps = temps_cy[temps_cy.index.month.isin([3,4,5])]
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
@@ -237,28 +232,29 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     elif period == 'winter':
         temps_py = temps_py[temps_py.index.month.isin([12])]
         temps_cy = temps_cy[temps_cy.index.month.isin([1,2])]
-        frames = [temps_py, temps_cy]
-        temps = pd.concat(frames)
-        df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(01-)|(02-)|(12-)')]
-        df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(01-)|(02-)|(12-)')]
-        df_high_norms = df_norms[3][334:60]
-        df_low_norms = df_norms[4][334:60]
-        print(temps)
-        
-        
-        
+        temp_frames = [temps_py, temps_cy]
+        temps = pd.concat(temp_frames)
 
-        # print(df_record_highs_ly)
-    
-    
-    # if int(selected_year) % 4 != 0:
-    #     df_record_highs = df_record_highs_ly.drop(df_record_highs_ly.index[59])
-    #     df_record_lows = df_record_lows_ly.drop(df_record_lows_ly.index[59])
-    # else:
-    #     df_record_highs = df_record_highs_ly
-    #     df_record_lows = df_record_lows_ly
-        
-    
+        df_record_highs_jan_feb = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(01-)|(02-)')]
+        df_record_highs_dec = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(12-)')]
+        high_frames = [df_record_highs_dec, df_record_highs_jan_feb]
+        df_record_highs_ly = pd.concat(high_frames)
+
+        df_record_lows_jan_feb = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(01-)|(02-)')]
+        df_record_lows_dec = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(12-)')]
+        low_frames = [df_record_lows_dec, df_record_lows_jan_feb]
+        df_record_lows_ly = pd.concat(low_frames)
+
+        # df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(01-)|(02-)|(12-)')]
+        df_high_norms_jan_feb = df_norms[3][0:60]
+        df_high_norms_dec = df_norms[3][335:]
+        high_norm_frames = [df_high_norms_dec, df_high_norms_jan_feb]
+        df_high_norms = pd.concat(high_norm_frames)
+        df_low_norms_jan_feb = df_norms[4][0:60]
+        df_low_norms_dec = df_norms[4][335:]
+        low_norm_frames = [df_low_norms_dec, df_low_norms_jan_feb]
+        df_low_norms = pd.concat(low_norm_frames)
+       
     trace = [
             go.Bar(
                 y = temps[5],

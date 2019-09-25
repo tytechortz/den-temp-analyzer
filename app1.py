@@ -229,7 +229,7 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_high_norms = df_norms[3][151:244]
         df_low_norms = df_norms[4][151:244]
     elif period == 'fall':
-        temps = temps[temps.index.month.isin([9,10,11])]
+        temps = temps_cy[temps_cy.index.month.isin([9,10,11])]
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(09-)|(10-)|(11-)')]
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(09-)|(10-)|(11-)')]
         df_high_norms = df_norms[3][243:335]

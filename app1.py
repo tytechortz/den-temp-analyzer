@@ -30,7 +30,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
 df_norms = pd.DataFrame(norm_records)
-print(df_norms)
+# print(df_norms)
 
 df_rec_lows = pd.DataFrame(rec_lows)
 
@@ -121,6 +121,9 @@ body = dbc.Container([
              [Input('year', 'value'),
              Input('period', 'value')])
 def all_temps(selected_year, period):
+    print(type(selected_year))
+    previous_year = int(selected_year) - 1
+    print(previous_year)
     try:
         connection = psycopg2.connect(user = "postgres",
                                     password = "1234",
@@ -129,10 +132,11 @@ def all_temps(selected_year, period):
 
         cursor = connection.cursor()
 
-        postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) = {}'.format(selected_year)
+        postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) IN ({},{})'.format(selected_year, previous_year)
         cursor.execute(postgreSQL_select_year_Query)
         temp_records = cursor.fetchall()
         df = pd.DataFrame(temp_records)
+        print(df)
         
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
@@ -199,10 +203,13 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     df_record_lows_ly = pd.read_json(rec_lows)
     df_record_lows_ly = df_record_lows_ly.set_index(1)
     df_norms = pd.read_json(norms)
-    print(df_norms)
+    # print(df_norms)
     # df_high_norms = df_high_norms.set_index(1)
     # df_low_norms = pd.read_json(low_norms, typ='series')
     # span = [spans[period]]
+    # if period == 'winter':
+
+        
     if period == 'spring':
         temps = temps[temps.index.month.isin([3,4,5])]
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
@@ -215,6 +222,12 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(06-)|(07-)|(08-)')]
         df_high_norms = df_norms[3][151:244]
         df_low_norms = df_norms[4][151:244]
+    elif period == 'fall':
+        temps = temps[temps.index.month.isin([9,10,11])]
+        df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(09-)|(10-)|(11-)')]
+        df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(09-)|(10-)|(11-)')]
+        df_high_norms = df_norms[3][244:335]
+        df_low_norms = df_norms[4][244:335]
         
         
         

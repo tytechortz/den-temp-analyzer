@@ -17,10 +17,10 @@ import psycopg2
 from psycopg2 import pool
 import operator
 from dash.exceptions import PreventUpdate
+from sqlalchemy import create_engine
 import json
-# import conect
+import csv
 from conect import norm_records, rec_lows, rec_highs, all_temps
-# from conect import rec_lows
  
 
 current_year = datetime.now().year
@@ -30,12 +30,11 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
 df_norms = pd.DataFrame(norm_records)
-# print(df_norms)
 
 df_rec_lows = pd.DataFrame(rec_lows)
+# print(df_rec_lows.to_string())
 
 df_rec_highs = pd.DataFrame(rec_highs)
-# print(df_rec_highs)
 
 
 body = dbc.Container([
@@ -57,6 +56,12 @@ body = dbc.Container([
         dbc.Col(
             html.Div('Options')
         ),
+        dbc.Col(
+            html.Button('Update Data', id='data-button'),
+        ),
+        dbc.Col(
+            html.Div(id='output-data-button')
+        )
     ]),
     dbc.Row([
         dbc.Col(
@@ -104,41 +109,88 @@ body = dbc.Container([
             width={'size':8}
         ),
     ]),
-    dbc.Row([
-        dbc.Col(
-            html.H5('SELECT YEAR', style={'text-align':'center'})
-        ),
-    ]),
     html.Div(id='temp-data', style={'display': 'none'}),
     html.Div(id='rec-highs', style={'display': 'none'}),
     html.Div(id='rec-lows', style={'display': 'none'}),
     html.Div(id='norms', style={'display': 'none'}),
-    # html.Div(id='low-norms', style={'display': 'none'}),
 ])
 
 
-@app.callback(Output('temp-data', 'children'),
-             [Input('year', 'value'),
-             Input('period', 'value')])
-def all_temps(selected_year, period):
-    # print(type(selected_year))
-    previous_year = int(selected_year) - 1
-    # print(previous_year)
+@app.callback(Output('output-data-button', 'children'),
+             [Input('data-button', 'n_clicks')])
+def update_data(n_clicks):
+
+    # url = 'https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=2019-09-25&units=standard'
+    # response = requests.get(url)
+    # # temperatures = csv.reader(response)
+    # temperatures = csv.reader(response)
+    # print(type(url))
+    
+    temperatures = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=2019-09-25&units=standard')
+
+
+    print(temperatures)
+
+    engine = create_engine('postgresql://postgres:1234@localhost:5432/denver_temps')
+    # temperatures.to_sql('temps', engine)
+
+    # sql_insert = """INSERT INTO temps(index, STATION, DATE, TMAX,              TMIN)
+    #             VALUES(%s, %s, %s, %s, %s)
+    #             ON CONFLICT
+    #             DO NOTHING"""
+
     try:
         connection = psycopg2.connect(user = "postgres",
                                     password = "1234",
                                     host = "localhost",
                                     database = "denver_temps")
+        cursor = connection.cursor()
 
+        temperatures.to_sql('temps', engine, if_exists='replace')
+
+        # with open(temperatures, 'r') as f:
+        #     reader = csv.reader(f)
+        #     next(reader)
+
+        #     for record in reader:
+        #         cursor.execute(sql_insert, record)
+        #         connection.commit()
+
+
+        # postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) IN ({},{})'.format(selected_year, previous_year)
+        # cursor.execute(postgreSQL_select_year_Query)
+        # temp_records = cursor.fetchall()
+        # df = pd.DataFrame(temp_records)
+      
+    except (Exception, psycopg2.Error) as error :
+        print ("Error while fetching data from PostgreSQL", error)
+    
+    finally:
+        #closing database connection.
+        if(connection):
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+    return "Clicks = {}".format(n_clicks)
+
+@app.callback(Output('temp-data', 'children'),
+             [Input('year', 'value'),
+             Input('period', 'value')])
+def all_temps(selected_year, period):
+    previous_year = int(selected_year) - 1
+    try:
+        connection = psycopg2.connect(user = "postgres",
+                                    password = "1234",
+                                    host = "localhost",
+                                    database = "denver_temps")
         cursor = connection.cursor()
 
         postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) IN ({},{})'.format(selected_year, previous_year)
         cursor.execute(postgreSQL_select_year_Query)
         temp_records = cursor.fetchall()
         df = pd.DataFrame(temp_records)
-        # print(df)
-        
-        
+      
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
     
@@ -170,15 +222,6 @@ def norm_highs(selected_year):
         norms = df_norms.drop(df_norms.index[59])
     return norms.to_json()
 
-# @app.callback(Output('low-norms', 'children'),
-#              [Input('year', 'value')])
-# def norm_lows(selected_year):
-#     if int(selected_year) % 4 == 0:
-#         low_norms = df_norms[4]
-#     else:
-#         low_norms = df_norms[4].drop(df_norms.index[59])
-#     return low_norms.to_json()
-
 @app.callback(Output('graph1', 'figure'),
              [Input('temp-data', 'children'),
              Input('rec-highs', 'children'),
@@ -189,23 +232,16 @@ def norm_highs(selected_year):
              Input('period', 'value')])
 def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     previous_year = int(selected_year) - 1
-    # spans = {'spring': [59,152], 'spring_ly': [60,153]}
-    # print(spans['spring'][0])
     temps = pd.read_json(temp_data)
     temps[2] = pd.to_datetime(temps[2])
-    # print(temps)
     temps = temps.set_index(2)
-    # print(temps)
     temps[6] = temps.index.day_name()
     temps[5] = temps[3] - temps[4]
-    # print(temps)
+    # temps.iat[19493, 3]=32
     temps_cy = temps[temps.index.year.isin([selected_year])]
-    # print(temps_cy)
     temps_py = temps[temps.index.year.isin([previous_year])]
-    # print(temps_py)
     df_record_highs_ly = pd.read_json(rec_highs)
     df_record_highs_ly = df_record_highs_ly.set_index(1)
-    # print(df_record_highs_ly)
     df_record_lows_ly = pd.read_json(rec_lows)
     df_record_lows_ly = df_record_lows_ly.set_index(1)
     df_norms = pd.read_json(norms)
@@ -239,13 +275,10 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_record_highs_dec = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(12-)')]
         high_frames = [df_record_highs_dec, df_record_highs_jan_feb]
         df_record_highs_ly = pd.concat(high_frames)
-
         df_record_lows_jan_feb = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(01-)|(02-)')]
         df_record_lows_dec = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(12-)')]
         low_frames = [df_record_lows_dec, df_record_lows_jan_feb]
         df_record_lows_ly = pd.concat(low_frames)
-
-        # df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(01-)|(02-)|(12-)')]
         df_high_norms_jan_feb = df_norms[3][0:60]
         df_high_norms_dec = df_norms[3][335:]
         high_norm_frames = [df_high_norms_dec, df_high_norms_jan_feb]
@@ -259,8 +292,7 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         temps = temps_cy
         df_high_norms = df_norms[3]
         df_low_norms = df_norms[4]
-
-       
+      
     trace = [
             go.Bar(
                 y = temps[5],
@@ -281,16 +313,16 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
                 # hoverinfo='none',
                 name='Normal Low'
             ),
-            # go.Scatter(
-            #     y = df_record_highs_ly[0],
-            #     # hoverinfo='none',
-            #     name='Record High'
-            # ),
-            # go.Scatter(
-            #     y = df_record_lows_ly[0],
-            #     # hoverinfo='none',
-            #     name='Record Low'
-            # ),
+            go.Scatter(
+                y = df_record_highs_ly[0],
+                # hoverinfo='none',
+                name='Record High'
+            ),
+            go.Scatter(
+                y = df_record_lows_ly[0],
+                # hoverinfo='none',
+                name='Record Low'
+            ),
         ]
     layout = go.Layout(
                 xaxis = {'rangeslider': {'visible':True},},

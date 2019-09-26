@@ -120,25 +120,10 @@ body = dbc.Container([
              [Input('data-button', 'n_clicks')])
 def update_data(n_clicks):
 
-    # url = 'https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=2019-09-25&units=standard'
-    # response = requests.get(url)
-    # # temperatures = csv.reader(response)
-    # temperatures = csv.reader(response)
-    # print(type(url))
-    
     temperatures = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=2019-09-25&units=standard')
 
-
-    print(temperatures)
-
     engine = create_engine('postgresql://postgres:1234@localhost:5432/denver_temps')
-    # temperatures.to_sql('temps', engine)
-
-    # sql_insert = """INSERT INTO temps(index, STATION, DATE, TMAX,              TMIN)
-    #             VALUES(%s, %s, %s, %s, %s)
-    #             ON CONFLICT
-    #             DO NOTHING"""
-
+    
     try:
         connection = psycopg2.connect(user = "postgres",
                                     password = "1234",
@@ -147,21 +132,7 @@ def update_data(n_clicks):
         cursor = connection.cursor()
 
         temperatures.to_sql('temps', engine, if_exists='replace')
-
-        # with open(temperatures, 'r') as f:
-        #     reader = csv.reader(f)
-        #     next(reader)
-
-        #     for record in reader:
-        #         cursor.execute(sql_insert, record)
-        #         connection.commit()
-
-
-        # postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) IN ({},{})'.format(selected_year, previous_year)
-        # cursor.execute(postgreSQL_select_year_Query)
-        # temp_records = cursor.fetchall()
-        # df = pd.DataFrame(temp_records)
-      
+    
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
     

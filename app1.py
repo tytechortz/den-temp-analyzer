@@ -200,8 +200,9 @@ def norm_highs(selected_year):
     return norms.to_json()
 
 @app.callback(Output('fyma', 'figure'),
-             [Input('year', 'value')])
-def update_figure(selected_year):
+             [Input('year', 'value'),
+             Input('temp-param', 'value')])
+def update_figure(selected_year, selected_param):
     temps = df_all_temps
     print(temps)
     all_max_rolling = temps[3].dropna().rolling(window=1825)
@@ -209,18 +210,21 @@ def update_figure(selected_year):
     all_min_rolling = temps[4].dropna().rolling(window=1825)
     all_min_rolling_mean = all_min_rolling.mean()
 
-
-
-    trace = [
-        go.Scatter(
-                y = all_max_rolling_mean,
+    if selected_param == 'Tmax':
+        trace = [
+            go.Scatter(
+                    y = all_max_rolling_mean,
+                    x = temps[2],
+                    name='Max Temp'
+                ),
+        ]
+    elif selected_param == 'Tmin':
+        trace = [
+            go.Scatter(
+                y = all_min_rolling_mean,
                 x = temps[2],
-                name='Max Temp'
+                name='Min Temp'
             ),
-            # go.Scatter(
-            #     y = all_min_rolling_mean,
-            #     name='Max Temp'
-            # ),
     ]
     layout = go.Layout(
         xaxis = {'rangeslider': {'visible':True},},
@@ -392,8 +396,6 @@ def display_graph_info_row(product_value):
    
 def display_period_selector(product_value):
     if product_value == 'temp-graph':
-        # def labeler():
-        #     return 
         return  dcc.RadioItems(
                     id = 'period',
                     options = [
@@ -406,6 +408,17 @@ def display_period_selector(product_value):
                     value = 'annual',
                     labelStyle = {'display':'block'}
                 )
+    elif product_value == 'fyma':
+        return  dcc.RadioItems(
+                    id = 'temp-param',
+                    options = [
+                        {'label':'Max Temp', 'value':'Tmax'},
+                        {'label':'Min Temop', 'value':'Tmin'},
+                    ],
+                    value = 'Tmax',
+                    labelStyle = {'display':'block'}
+                )
+
 
 
 

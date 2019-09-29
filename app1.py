@@ -37,6 +37,8 @@ df_rec_lows = pd.DataFrame(rec_lows)
 df_rec_highs = pd.DataFrame(rec_highs)
 
 df_all_temps = pd.DataFrame(all_temps)
+df_all_temps[2] = pd.to_datetime(df_all_temps[2])
+df_all_temps = df_all_temps.set_index([2])
 # print(df_all_temps)
 
 
@@ -203,10 +205,17 @@ def norm_highs(selected_year):
              [Input('year', 'value'),
              Input('temp-param', 'value')])
 def update_figure(selected_year, selected_param):
-    temps = df_all_temps
-    print(temps)
+    # selected_year = datetime.strptime(selected_year, '%Y')
+    temps = df_all_temps.loc['1950-1-1':str(selected_year)+'-1-1']
+
+    # selected_date = str(selected_year) + ''
+    print(type(temps))
+    
+    print(type(selected_year))
     all_max_rolling = temps[3].dropna().rolling(window=1825)
     all_max_rolling_mean = all_max_rolling.mean()
+    print(type(all_max_rolling_mean))
+    # max_mask = (all_max_rolling_mean.index > 1949-12-31) & (all_max_rolling_mean.index <= selected_year)
     all_min_rolling = temps[4].dropna().rolling(window=1825)
     all_min_rolling_mean = all_min_rolling.mean()
 
@@ -214,7 +223,7 @@ def update_figure(selected_year, selected_param):
         trace = [
             go.Scatter(
                     y = all_max_rolling_mean,
-                    x = temps[2],
+                    x = temps.index,
                     name='Max Temp'
                 ),
         ]

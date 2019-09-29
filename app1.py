@@ -39,7 +39,7 @@ df_rec_highs = pd.DataFrame(rec_highs)
 df_all_temps = pd.DataFrame(all_temps)
 df_all_temps[2] = pd.to_datetime(df_all_temps[2])
 df_all_temps = df_all_temps.set_index([2])
-# print(df_all_temps)
+# print(df_all_temps.index.year.unique())
 
 
 body = dbc.Container([
@@ -111,7 +111,10 @@ body = dbc.Container([
             html.Div(
                 id='graph-stuff'
             ),
-            width={'size':8}
+            html.Div(
+                id='year-slider'
+            ),
+            width={'size':8},
         ),
     ]),
     html.Div(id='temp-data', style={'display': 'none'}),
@@ -127,7 +130,9 @@ def update_data(n_clicks):
 
     temperatures = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=' + today + '&units=standard')
 
-    most_recent_data_date = temperatures.iloc['DATE'][-1]
+    print(temperatures)
+
+    most_recent_data_date = temperatures['DATE'].iloc[-1]
 
     print(most_recent_data_date)
     engine = create_engine('postgresql://postgres:1234@localhost:5432/denver_temps')
@@ -231,16 +236,16 @@ def update_figure(selected_year, selected_param):
         trace = [
             go.Scatter(
                 y = all_min_rolling_mean,
-                x = temps[2],
+                x = temps.index,
                 name='Min Temp'
             ),
     ]
     layout = go.Layout(
-        xaxis = {'rangeslider': {'visible':True},},
+        # xaxis = {'rangeslider': {'visible':True},},
         yaxis = {"title": 'Temperature F'},
         title ='5 Year Rolling Mean',
         plot_bgcolor = 'lightgray',
-        height = 700,
+        height = 500,
     )
     return {'data': trace, 'layout': layout}
 
@@ -256,8 +261,8 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     previous_year = int(selected_year) - 1
     # temps = pd.read_json(temp_data)
     temps = df_all_temps
-    temps[2] = pd.to_datetime(temps[2])
-    temps = temps.set_index(2)
+    # temps[2] = pd.to_datetime(temps[2])
+    # temps = temps.set_index(2)
     temps[6] = temps.index.day_name()
     temps[5] = temps[3] - temps[4]
     # temps.iat[19493, 3]=32
@@ -319,6 +324,7 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     trace = [
             go.Bar(
                 y = temps[5],
+                x = temps.index,
                 # x = data_period,
                 base = temps[4],
                 name='Temp Range',
@@ -328,21 +334,25 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
             ),
             go.Scatter(
                 y = df_high_norms,
+                x = temps.index,
                 # hoverinfo='none',
                 name='Normal High'
             ),
             go.Scatter(
                 y = df_low_norms,
+                x = temps.index,
                 # hoverinfo='none',
                 name='Normal Low'
             ),
             go.Scatter(
                 y = df_record_highs_ly[0],
+                x = temps.index,
                 # hoverinfo='none',
                 name='Record High'
             ),
             go.Scatter(
                 y = df_record_lows_ly[0],
+                x = temps.index,
                 # hoverinfo='none',
                 name='Record Low'
             ),
@@ -379,6 +389,8 @@ def display_year_selector(product_value):
     elif product_value == 'daily-data-month':
         return
 
+
+
 @app.callback(
     Output('graph-stuff', 'children'),
     [Input('product', 'value')])
@@ -386,7 +398,19 @@ def display_graph(value):
     if value == 'temp-graph':
         return dcc.Graph(id='graph1')
     elif value == 'fyma':
-        return dcc.Graph(id='fyma')
+        return dcc.Graph(id='fyma') 
+    
+
+@app.callback(
+    Output('year-slider', 'children'),
+    [Input('product', 'value')])
+def display_graph(value):
+    if value == 'fyma':
+        return dcc.Slider(id='fyma-slider',
+            min=df_all_temps.index.year.min(),
+            max=df_all_temps.index.year.max(),
+            marks={str(year): str(year) for year in df_all_temps.index.year.unique()}
+        )
 
 @app.callback(
     Output('graph-info-row', 'children'),
@@ -427,6 +451,12 @@ def display_period_selector(product_value):
                     value = 'Tmax',
                     labelStyle = {'display':'block'}
                 )
+
+# @app.callback(
+#     Output('year-slider', 'children'),
+#     [Input('temp-param', 'value')])
+# def display_year_selector(product_value):
+    
 
 
 

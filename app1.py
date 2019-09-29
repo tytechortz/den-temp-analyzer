@@ -203,14 +203,24 @@ def norm_highs(selected_year):
              [Input('year', 'value')])
 def update_figure(selected_year):
     temps = df_all_temps
-    print(temps.isnull().sum())
+    print(temps)
     all_max_rolling = temps[3].dropna().rolling(window=1825)
     all_max_rolling_mean = all_max_rolling.mean()
+    all_min_rolling = temps[4].dropna().rolling(window=1825)
+    all_min_rolling_mean = all_min_rolling.mean()
+
+
+
     trace = [
         go.Scatter(
                 y = all_max_rolling_mean,
+                x = temps[2],
                 name='Max Temp'
             ),
+            # go.Scatter(
+            #     y = all_min_rolling_mean,
+            #     name='Max Temp'
+            # ),
     ]
     layout = go.Layout(
         xaxis = {'rangeslider': {'visible':True},},
@@ -372,6 +382,8 @@ def display_graph_info_row(product_value):
     print(product_value)
     if product_value == 'temp-graph':
         return html.Div('Select Period')
+    elif product_value == 'fyma':
+        return html.Div('Select Parameter')
 
 @app.callback(
     Output('period-picker', 'children'),

@@ -46,9 +46,16 @@ df_ya_max = df_all_temps.resample('Y').mean()
 df5 = df_ya_max[:-1]
 print(df5)
 
+
+# trend line equations for all temp graphs
 def all_max_temp_fit():
     xi = arange(0,year_count)
     slope, intercept, r_value, p_value, std_err = stats.linregress(xi,df5[3])
+    return (slope*xi+intercept)
+
+def all_min_temp_fit():
+    xi = arange(0,year_count)
+    slope, intercept, r_value, p_value, std_err = stats.linregress(xi,df5[4])
     return (slope*xi+intercept)
 
 
@@ -244,6 +251,12 @@ def update_figure(selected_year, selected_param):
                 y = all_min_rolling_mean,
                 x = temps.index,
                 name='Min Temp'
+            ),
+            go.Scatter(
+                y = all_min_temp_fit(),
+                x = df5.index,
+                name = 'trend',
+                line = {'color':'red'}
             ),
     ]
     layout = go.Layout(

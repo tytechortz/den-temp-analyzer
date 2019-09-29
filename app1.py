@@ -120,8 +120,11 @@ body = dbc.Container([
              [Input('data-button', 'n_clicks')])
 def update_data(n_clicks):
 
-    temperatures = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=2019-09-25&units=standard')
+    temperatures = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=' + today + '&units=standard')
 
+    most_recent_data_date = temperatures.iloc['DATE'][-1]
+
+    print(most_recent_data_date)
     engine = create_engine('postgresql://postgres:1234@localhost:5432/denver_temps')
     
     try:
@@ -143,7 +146,7 @@ def update_data(n_clicks):
             connection.close()
             print("PostgreSQL connection is closed")
 
-    return "Clicks = {}".format(n_clicks)
+    return "Data Through {}".format(most_recent_data_date)
 
 @app.callback(Output('temp-data', 'children'),
              [Input('year', 'value'),

@@ -36,6 +36,9 @@ df_rec_lows = pd.DataFrame(rec_lows)
 
 df_rec_highs = pd.DataFrame(rec_highs)
 
+df_all_temps = pd.DataFrame(all_temps)
+# print(df_all_temps)
+
 
 body = dbc.Container([
     dbc.Row([
@@ -197,12 +200,12 @@ def norm_highs(selected_year):
     return norms.to_json()
 
 @app.callback(Output('fyma', 'figure'),
-             [Input('year', 'value'),
-             Input('temp-data', 'children')])
-def update_figure(selected_year, temp_data):
-    temps = pd.read_json(temp_data)
-    all_max_rolling = df['TMAX'].rolling(window=1825)
-    all_max_roilling_mean = all_max_rolling.mean()
+             [Input('year', 'value')])
+def update_figure(selected_year):
+    temps = df_all_temps
+    print(temps.isnull().sum())
+    all_max_rolling = temps[3].dropna().rolling(window=1825)
+    all_max_rolling_mean = all_max_rolling.mean()
     trace = [
         go.Scatter(
                 y = all_max_rolling_mean,
@@ -228,7 +231,8 @@ def update_figure(selected_year, temp_data):
              Input('period', 'value')])
 def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     previous_year = int(selected_year) - 1
-    temps = pd.read_json(temp_data)
+    # temps = pd.read_json(temp_data)
+    temps = df_all_temps
     temps[2] = pd.to_datetime(temps[2])
     temps = temps.set_index(2)
     temps[6] = temps.index.day_name()
@@ -342,7 +346,7 @@ def display_time_param(product_value):
     Output('year-picker', 'children'),
     [Input('product', 'value')])
 def display_year_selector(product_value):
-    if product_value == 'temp-graph':
+    if product_value == 'temp-graph' or 'fyma':
         return dcc.Input(
                     id = 'year',
                     type = 'number',

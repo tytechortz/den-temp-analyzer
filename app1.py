@@ -69,8 +69,8 @@ body = dbc.Container([
                 {'label':'Daily data for a month', 'value':'daily-data-month'},
                 {'label':'Temperature graphs', 'value':'temp-graph'},
                 {'label':'Calendar day summaries', 'value':'cal-day-summary'},
+                {'label':'5 Year Moving Avgs', 'value':'fyma'},
             ],
-            value = 'daily_data_month'
             ),
             width = {'size': 3}
     # justify='around',
@@ -195,6 +195,28 @@ def norm_highs(selected_year):
     else:
         norms = df_norms.drop(df_norms.index[59])
     return norms.to_json()
+
+@app.callback(Output('fyma', 'figure'),
+             [Input('year', 'value'),
+             Input('temp-data', 'children')])
+def update_figure(selected_year, temp_data):
+    temps = pd.read_json(temp_data)
+    all_max_rolling = df['TMAX'].rolling(window=1825)
+    all_max_roilling_mean = all_max_rolling.mean()
+    trace = [
+        go.Scatter(
+                y = all_max_rolling_mean,
+                name='Max Temp'
+            ),
+    ]
+    layout = go.Layout(
+        xaxis = {'rangeslider': {'visible':True},},
+        yaxis = {"title": 'Temperature F'},
+        title ='5 Year Rolling Mean',
+        plot_bgcolor = 'lightgray',
+        height = 700,
+    )
+    return {'data': trace, 'layout': layout}
 
 @app.callback(Output('graph1', 'figure'),
              [Input('temp-data', 'children'),
@@ -336,6 +358,8 @@ def display_year_selector(product_value):
 def display_graph(value):
     if value == 'temp-graph':
         return dcc.Graph(id='graph1')
+    elif value == 'fyma':
+        return dcc.Graph(id='fyma')
 
 @app.callback(
     Output('graph-info-row', 'children'),

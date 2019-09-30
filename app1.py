@@ -7,7 +7,7 @@ import pandas as pd
 import sqlite3
 from dash.dependencies import Input, Output, State
 import time
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from pandas import Series
 from scipy import stats
 from scipy.stats import norm 
@@ -22,7 +22,7 @@ import json
 import csv
 from conect import norm_records, rec_lows, rec_highs, all_temps
  
-
+# print(rec_lows)
 current_year = datetime.now().year
 today = time.strftime("%Y-%m-%d")
 
@@ -33,18 +33,22 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
 df_norms = pd.DataFrame(norm_records)
+print(type(df_norms[2].iloc[-1]))
 
 df_rec_lows = pd.DataFrame(rec_lows)
+# print(df_rec_lows)
 
 df_rec_highs = pd.DataFrame(rec_highs)
+# print(df_rec_highs)
 
 df_all_temps = pd.DataFrame(all_temps)
 df_all_temps[2] = pd.to_datetime(df_all_temps[2])
 df_all_temps = df_all_temps.set_index([2])
 
+
 df_ya_max = df_all_temps.resample('Y').mean()
 df5 = df_ya_max[:-1]
-print(df5)
+# print(df5)
 
 
 # trend line equations for all temp graphs
@@ -137,39 +141,42 @@ body = dbc.Container([
 ])
 
 
-@app.callback(Output('output-data-button', 'children'),
-             [Input('data-button', 'n_clicks')])
-def update_data(n_clicks):
+# @app.callback(Output('output-data-button', 'children'),
+#              [Input('data-button', 'n_clicks')])
+# def update_data(n_clicks):
 
-    temperatures = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=' + today + '&units=standard')
+#     temperatures = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=' + today + '&units=standard')
 
-    print(temperatures)
+    # print(temperatures)
 
-    most_recent_data_date = temperatures['DATE'].iloc[-1]
+    # most_recent_data_date = temperatures['DATE'].iloc[-1]
 
-    print(most_recent_data_date)
-    engine = create_engine('postgresql://postgres:1234@localhost:5432/denver_temps')
+    # print(most_recent_data_date)
+    # engine = create_engine('postgresql://postgres:1234@localhost:5432/denver_temps')
+    # temperatures.to_sql('temps', engine, if_exists='do nothing')
+
+
     
-    try:
-        connection = psycopg2.connect(user = "postgres",
-                                    password = "1234",
-                                    host = "localhost",
-                                    database = "denver_temps")
-        cursor = connection.cursor()
+    # try:
+        # connection = psycopg2.connect(user = "postgres",
+        #                             password = "1234",
+        #                             host = "localhost",
+        #                             database = "denver_temps")
+        # cursor = connection.cursor()
 
-        temperatures.to_sql('temps', engine, if_exists='replace')
+        # temperatures.to_sql('temps', engine, if_exists='replace')
     
-    except (Exception, psycopg2.Error) as error :
-        print ("Error while fetching data from PostgreSQL", error)
+    # except (Exception, psycopg2.Error) as error :
+    #     print ("Error while fetching data from PostgreSQL", error)
     
-    finally:
-        #closing database connection.
-        if(connection):
-            cursor.close()
-            connection.close()
-            print("PostgreSQL connection is closed")
+    # finally:
+    #     #closing database connection.
+    #     if(connection):
+    #         cursor.close()
+    #         connection.close()
+    #         print("PostgreSQL connection is closed")
 
-    return "Data Through {}".format(most_recent_data_date)
+    # return "Data Through {}".format(most_recent_data_date)
 
 @app.callback(Output('temp-data', 'children'),
              [Input('year', 'value'),
@@ -260,7 +267,7 @@ def update_figure(selected_year, selected_param):
             ),
     ]
     layout = go.Layout(
-        # xaxis = {'rangeslider': {'visible':True},},
+        xaxis = {'rangeslider': {'visible':True},},
         yaxis = {"title": 'Temperature F'},
         title ='5 Year Rolling Mean',
         plot_bgcolor = 'lightgray',
@@ -280,6 +287,33 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     previous_year = int(selected_year) - 1
    
     temps = df_all_temps
+
+    # def x_axis_range(selected_year):
+    #     date_range = []
+    #     sdate = date(int(selected_year), 1, 1)
+    #     edate = date(int(selected_year), 12, 31)
+
+    #     delta = edate - sdate
+
+    #     for i in range(delta.days + 1):
+    #         day = sdate + timedelta(days=i)
+    #         date_range.append(day)
+
+    #     return date_range
+
+    date_range = []
+    date_time = []
+    sdate = date(int(selected_year), 1, 1)
+    edate = date(int(selected_year), 12, 31)
+
+    delta = edate - sdate
+
+    for i in range(delta.days + 1):
+        day = sdate + timedelta(days=i)
+        date_range.append(day)
+    for j in date_range:
+        day = j.strftime("%Y-%m-%d")
+        date_time.append(day)
    
     temps[6] = temps.index.day_name()
     temps[5] = temps[3] - temps[4]
@@ -289,8 +323,14 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     df_record_highs_ly = pd.read_json(rec_highs)
     df_record_highs_ly = df_record_highs_ly.set_index(1)
     df_record_lows_ly = pd.read_json(rec_lows)
+    # df_record_lows_ly[1] = pd.to_datetime(df_record_lows_ly[1])
     df_record_lows_ly = df_record_lows_ly.set_index(1)
     df_norms = pd.read_json(norms)
+    # print(type(df_norms[2]))
+    # df_norms[2] = pd.to_datetime(df_norms[2])
+    # # df_all_temps[2] = pd.to_datetime(df_all_temps[2])
+    # df_norms[2] = df_norms[2].dt.strftime('%Y-%m-%d')
+    print(date_time)
   
   
     if period == 'spring':
@@ -298,7 +338,8 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
         df_high_norms = df_norms[3][59:152]
-        df_low_norms = df_norms[4][59:152]
+        df_low_norms = df_norms[59:152]
+        # print(df_low_norms)
     elif period == 'summer':
         temps = temps_cy[temps_cy.index.month.isin([6,7,8])]
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(06-)|(07-)|(08-)')]
@@ -342,8 +383,8 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     trace = [
             go.Bar(
                 y = temps[5],
-                x = temps.index,
-                # x = data_period,
+                x = temps_cy.index,
+                # x = date_time,
                 base = temps[4],
                 name='Temp Range',
                 marker = {'color':'dodgerblue'},
@@ -352,25 +393,25 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
             ),
             go.Scatter(
                 y = df_high_norms,
-                x = temps.index,
+                x = date_time,
                 # hoverinfo='none',
                 name='Normal High'
             ),
             go.Scatter(
                 y = df_low_norms,
-                x = temps.index,
+                x = date_time,
                 # hoverinfo='none',
                 name='Normal Low'
             ),
             go.Scatter(
                 y = df_record_highs_ly[0],
-                x = temps.index,
+                x = date_time,
                 # hoverinfo='none',
                 name='Record High'
             ),
             go.Scatter(
                 y = df_record_lows_ly[0],
-                x = temps.index,
+                x = date_time,
                 # hoverinfo='none',
                 name='Record Low'
             ),

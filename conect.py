@@ -35,6 +35,7 @@ try:
 
         rh_cursor = rechighs_connection.cursor()
         rh_cursor.execute('SELECT max(ALL "TMAX") AS rec_high, to_char("DATE"::TIMESTAMP,\'MM-DD\') AS day FROM temps GROUP BY day ORDER BY day ASC')
+        # rh_cursor.execute('SELECT max(ALL "TMAX") AS rec_high FROM temps GROUP BY day ORDER BY day ASC')
         rec_highs = rh_cursor.fetchall()
         rh_cursor.close()
 

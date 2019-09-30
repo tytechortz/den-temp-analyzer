@@ -333,6 +333,8 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(06-)|(07-)|(08-)')]
         df_high_norms = df_norms[3][151:244]
         df_low_norms = df_norms[4][151:244]
+        date_time = date_time[151:244]
+        temps_cy = temps_cy[151:244]
 
     elif period == 'fall':
         temps = temps_cy[temps_cy.index.month.isin([9,10,11])]

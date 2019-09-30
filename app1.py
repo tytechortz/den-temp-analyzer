@@ -33,13 +33,13 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config['suppress_callback_exceptions']=True
 
 df_norms = pd.DataFrame(norm_records)
-print(type(df_norms[2].iloc[-1]))
+
 
 df_rec_lows = pd.DataFrame(rec_lows)
-# print(df_rec_lows)
+
 
 df_rec_highs = pd.DataFrame(rec_highs)
-# print(df_rec_highs)
+
 
 df_all_temps = pd.DataFrame(all_temps)
 df_all_temps[2] = pd.to_datetime(df_all_temps[2])
@@ -215,7 +215,11 @@ def rec_high_temps(selected_year):
 @app.callback(Output('rec-lows', 'children'),
              [Input('year', 'value')])
 def rec_low_temps(selected_year):
-    return df_rec_lows.to_json()
+    if int(selected_year) % 4 == 0:
+        rec_lows = df_rec_lows
+    else:
+        rec_lows = df_rec_lows.drop(df_rec_lows.index[59])
+    return rec_lows.to_json()
 
 @app.callback(Output('norms', 'children'),
              [Input('year', 'value')])
@@ -288,19 +292,6 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
    
     temps = df_all_temps
 
-    # def x_axis_range(selected_year):
-    #     date_range = []
-    #     sdate = date(int(selected_year), 1, 1)
-    #     edate = date(int(selected_year), 12, 31)
-
-    #     delta = edate - sdate
-
-    #     for i in range(delta.days + 1):
-    #         day = sdate + timedelta(days=i)
-    #         date_range.append(day)
-
-    #     return date_range
-
     date_range = []
     date_time = []
     sdate = date(int(selected_year), 1, 1)
@@ -323,35 +314,31 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     df_record_highs_ly = pd.read_json(rec_highs)
     df_record_highs_ly = df_record_highs_ly.set_index(1)
     df_record_lows_ly = pd.read_json(rec_lows)
-    # df_record_lows_ly[1] = pd.to_datetime(df_record_lows_ly[1])
+   
     df_record_lows_ly = df_record_lows_ly.set_index(1)
     df_norms = pd.read_json(norms)
-    # print(type(df_norms[2]))
-    # df_norms[2] = pd.to_datetime(df_norms[2])
-    # # df_all_temps[2] = pd.to_datetime(df_all_temps[2])
-    # df_norms[2] = df_norms[2].dt.strftime('%Y-%m-%d')
-    print(date_time)
-  
-  
+   
     if period == 'spring':
         temps = temps_cy[temps_cy.index.month.isin([3,4,5])]
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
         df_high_norms = df_norms[3][59:152]
         df_low_norms = df_norms[59:152]
-        # print(df_low_norms)
+      
     elif period == 'summer':
         temps = temps_cy[temps_cy.index.month.isin([6,7,8])]
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(06-)|(07-)|(08-)')]
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(06-)|(07-)|(08-)')]
         df_high_norms = df_norms[3][151:244]
         df_low_norms = df_norms[4][151:244]
+
     elif period == 'fall':
         temps = temps_cy[temps_cy.index.month.isin([9,10,11])]
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(09-)|(10-)|(11-)')]
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(09-)|(10-)|(11-)')]
         df_high_norms = df_norms[3][243:335]
         df_low_norms = df_norms[4][243:335]
+        
     elif period == 'winter':
         temps_py = temps_py[temps_py.index.month.isin([12])]
         temps_cy = temps_cy[temps_cy.index.month.isin([1,2])]

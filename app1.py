@@ -324,6 +324,8 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
         df_high_norms = df_norms[3][59:152]
         df_low_norms = df_norms[59:152]
+        date_time = date_time[59:152]
+        temps_cy = temps_cy[59:152]
       
     elif period == 'summer':
         temps = temps_cy[temps_cy.index.month.isin([6,7,8])]
@@ -338,7 +340,7 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(09-)|(10-)|(11-)')]
         df_high_norms = df_norms[3][243:335]
         df_low_norms = df_norms[4][243:335]
-        
+
     elif period == 'winter':
         temps_py = temps_py[temps_py.index.month.isin([12])]
         temps_cy = temps_cy[temps_cy.index.month.isin([1,2])]

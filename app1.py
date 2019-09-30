@@ -22,7 +22,6 @@ import json
 import csv
 from conect import norm_records, rec_lows, rec_highs, all_temps
  
-# print(rec_lows)
 current_year = datetime.now().year
 today = time.strftime("%Y-%m-%d")
 
@@ -34,22 +33,16 @@ app.config['suppress_callback_exceptions']=True
 
 df_norms = pd.DataFrame(norm_records)
 
-
 df_rec_lows = pd.DataFrame(rec_lows)
 
-
 df_rec_highs = pd.DataFrame(rec_highs)
-
 
 df_all_temps = pd.DataFrame(all_temps)
 df_all_temps[2] = pd.to_datetime(df_all_temps[2])
 df_all_temps = df_all_temps.set_index([2])
 
-
 df_ya_max = df_all_temps.resample('Y').mean()
 df5 = df_ya_max[:-1]
-# print(df5)
-
 
 # trend line equations for all temp graphs
 def all_max_temp_fit():
@@ -284,7 +277,6 @@ def update_figure(selected_year, selected_param):
              Input('rec-highs', 'children'),
              Input('rec-lows', 'children'),
              Input('norms', 'children'),
-            #  Input('low-norms', 'children'),
              Input('year', 'value'),
              Input('period', 'value')])
 def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
@@ -294,7 +286,7 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
 
     date_range = []
     date_time = []
-    sdate = date(int(selected_year), 1, 1)
+    sdate = date(int(previous_year), 12, 1)
     edate = date(int(selected_year), 12, 31)
 
     delta = edate - sdate
@@ -305,7 +297,7 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     for j in date_range:
         day = j.strftime("%Y-%m-%d")
         date_time.append(day)
-   
+
     temps[6] = temps.index.day_name()
     temps[5] = temps[3] - temps[4]
    
@@ -320,12 +312,13 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
    
     if period == 'spring':
         temps = temps_cy[temps_cy.index.month.isin([3,4,5])]
+        print(temps)
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
-        df_high_norms = df_norms[3][59:152]
-        df_low_norms = df_norms[59:152]
-        date_time = date_time[59:152]
-        temps_cy = temps_cy[59:152]
+        df_high_norms = df_norms[3][90:182]
+        df_low_norms = df_norms[4][90:182]
+        date_time = date_time[90:182]
+        bar_x = date_time
       
     elif period == 'summer':
         temps = temps_cy[temps_cy.index.month.isin([6,7,8])]
@@ -333,8 +326,8 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(06-)|(07-)|(08-)')]
         df_high_norms = df_norms[3][151:244]
         df_low_norms = df_norms[4][151:244]
-        date_time = date_time[151:244]
-        temps_cy = temps_cy[151:244]
+        date_time = date_time[183:275]
+        bar_x = date_time
 
     elif period == 'fall':
         temps = temps_cy[temps_cy.index.month.isin([9,10,11])]
@@ -342,12 +335,15 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(09-)|(10-)|(11-)')]
         df_high_norms = df_norms[3][243:335]
         df_low_norms = df_norms[4][243:335]
+        date_time = date_time[275:366]
+        bar_x = date_time
 
     elif period == 'winter':
         temps_py = temps_py[temps_py.index.month.isin([12])]
         temps_cy = temps_cy[temps_cy.index.month.isin([1,2])]
         temp_frames = [temps_py, temps_cy]
         temps = pd.concat(temp_frames)
+        date_time = date_time[:91]  
 
         df_record_highs_jan_feb = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(01-)|(02-)')]
         df_record_highs_dec = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(12-)')]
@@ -365,22 +361,23 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_low_norms_dec = df_norms[4][335:]
         low_norm_frames = [df_low_norms_dec, df_low_norms_jan_feb]
         df_low_norms = pd.concat(low_norm_frames)
-    
+        bar_x = date_time
+
     else:
         temps = temps_cy
         df_high_norms = df_norms[3]
         df_low_norms = df_norms[4]
+        date_time = date_time[31:]
+        bar_x = temps_cy.index
       
     trace = [
             go.Bar(
                 y = temps[5],
-                x = temps_cy.index,
-                # x = date_time,
+                x = bar_x,
                 base = temps[4],
                 name='Temp Range',
                 marker = {'color':'dodgerblue'},
-                hovertemplate = 'Temp Range: %{y} - %{base}<extra></extra>'
-                                
+                hovertemplate = 'Temp Range: %{y} - %{base}<extra></extra>'                  
             ),
             go.Scatter(
                 y = df_high_norms,
@@ -439,8 +436,6 @@ def display_year_selector(product_value):
     elif product_value == 'daily-data-month':
         return
 
-
-
 @app.callback(
     Output('graph-stuff', 'children'),
     [Input('product', 'value')])
@@ -449,18 +444,6 @@ def display_graph(value):
         return dcc.Graph(id='graph1')
     elif value == 'fyma':
         return dcc.Graph(id='fyma') 
-    
-
-# @app.callback(
-#     Output('year-slider', 'children'),
-#     [Input('temp-param', 'value')])
-# def display_slider(value):
-#     return dcc.Slider(
-#         id='fyma-slider',
-#         min=df_all_temps.index.year.min(),
-#         max=df_all_temps.index.year.max(),
-#         marks={str(year): str(year) for year in df_all_temps.index.year.unique()}
-#     )
 
 @app.callback(
     Output('graph-info-row', 'children'),
@@ -500,14 +483,6 @@ def display_period_selector(product_value):
                     value = 'Tmax',
                     labelStyle = {'display':'block'}
                 )
-
-# @app.callback(
-#     Output('year-slider', 'children'),
-#     [Input('temp-param', 'value')])
-# def display_year_selector(product_value):
-    
-
-
 
 
 app.layout = html.Div(body)

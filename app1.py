@@ -370,6 +370,8 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_low_norms = df_norms[4]
         date_time = date_time[31:]
         bar_x = temps_cy.index
+
+    mkr_color = {'color':'paleturquoise'}
       
     trace = [
             go.Bar(
@@ -377,32 +379,36 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
                 x = bar_x,
                 base = temps[4],
                 name='Temp Range',
-                marker = {'color':'dodgerblue'},
+                marker = mkr_color,
                 hovertemplate = 'Temp Range: %{y} - %{base}<extra></extra>'                  
             ),
             go.Scatter(
                 y = df_high_norms,
                 x = date_time,
                 # hoverinfo='none',
-                name='Normal High'
+                name='Normal High',
+                marker = {'color':'indianred'}
             ),
             go.Scatter(
                 y = df_low_norms,
                 x = date_time,
                 # hoverinfo='none',
-                name='Normal Low'
+                name='Normal Low',
+                marker = {'color':'slateblue'}
             ),
             go.Scatter(
                 y = df_record_highs_ly[0],
                 x = date_time,
                 # hoverinfo='none',
-                name='Record High'
+                name='Record High',
+                marker = {'color':'red'}
             ),
             go.Scatter(
                 y = df_record_lows_ly[0],
                 x = date_time,
                 # hoverinfo='none',
-                name='Record Low'
+                name='Record Low',
+                marker = {'color':'blue'}
             ),
         ]
     layout = go.Layout(

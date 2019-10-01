@@ -171,6 +171,7 @@ body = dbc.Container([
 
     # return "Data Through {}".format(most_recent_data_date)
 
+
 @app.callback(Output('temp-data', 'children'),
              [Input('year', 'value'),
              Input('period', 'value')])
@@ -281,7 +282,7 @@ def update_figure(selected_year, selected_param):
              Input('period', 'value')])
 def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     previous_year = int(selected_year) - 1
-   
+    selected_year = selected_year
     temps = df_all_temps
 
     date_range = []

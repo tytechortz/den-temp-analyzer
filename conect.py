@@ -1,9 +1,6 @@
 import psycopg2
 from psycopg2 import pool
-# from app1 import selected_year
 
-
-# print(selected_year)
 try:
 
     postgreSQL_pool = psycopg2.pool.SimpleConnectionPool(1, 20,user = "postgres",
@@ -40,7 +37,7 @@ try:
         rh_cursor.close()
 
         temps_cursor = temps_connection.cursor() 
-        temps_cursor.execute('SELECT * FROM temps')
+        temps_cursor.execute('SELECT * FROM temps ORDER BY "DATE" ASC')
         all_temps = temps_cursor.fetchall()
         temps_cursor.close()
 
@@ -61,4 +58,3 @@ finally:
         postgreSQL_pool.closeall
     print("PostgreSQL connection pool is closed")
 
-# print(year)

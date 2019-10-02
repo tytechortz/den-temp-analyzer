@@ -36,7 +36,7 @@ df_all_temps = pd.DataFrame(all_temps)
 df_all_temps[2] = pd.to_datetime(df_all_temps[2])
 print(df_all_temps)
 last_day = df_all_temps.iloc[-1, 2] + timedelta(days=1)
-last_day = last_day.strftime("%Y-%m-%d")
+ld = last_day.strftime("%Y-%m-%d")
 df_all_temps = df_all_temps.set_index([2])
 
 
@@ -143,11 +143,13 @@ body = dbc.Container([
              [Input('data-button', 'n_clicks')])
 def update_data(n_clicks):
 
-    temperatures = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=' + last_day + '&endDate=' + today + '&units=standard')
+    temperatures = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=' + ld + '&endDate=' + today + '&units=standard')
 
-    print(temperatures)
+    # print(temperatures)
 
-    most_recent_data_date = last_day
+    most_recent_data_date = last_day - timedelta(days=1)
+    mrd = most_recent_data_date.strftime("%Y-%m-%d")
+
 
     print(most_recent_data_date)
     engine = create_engine('postgresql://postgres:1234@localhost:5432/denver_temps')
@@ -174,7 +176,7 @@ def update_data(n_clicks):
     #         connection.close()
     #         print("PostgreSQL connection is closed")
 
-    return "Data Through {}".format(most_recent_data_date)
+    return "Data Through {}".format(mrd)
 
 
 @app.callback(Output('temp-data', 'children'),

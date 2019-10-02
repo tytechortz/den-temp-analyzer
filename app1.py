@@ -25,6 +25,7 @@ from conect import norm_records, rec_lows, rec_highs, all_temps
 current_year = datetime.now().year
 today = time.strftime("%Y-%m-%d")
 
+
 startyr = 1950
 year_count = current_year-startyr
 
@@ -54,6 +55,10 @@ def all_min_temp_fit():
     xi = arange(0,year_count)
     slope, intercept, r_value, p_value, std_err = stats.linregress(xi,df5[4])
     return (slope*xi+intercept)
+
+def mkr_color():
+
+    return mkr_color
 
 
 body = dbc.Container([
@@ -309,11 +314,17 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     df_record_lows_ly = pd.read_json(rec_lows)
    
     df_record_lows_ly = df_record_lows_ly.set_index(1)
+    df_rl_cy = df_record_lows_ly[:len(temps_cy.index)]
+    df_rh_cy = df_record_highs_ly[:len(temps_cy.index)]
+    print(df_rl_cy)
     df_norms = pd.read_json(norms)
-   
+    print(temps_cy)
+    # print(df_record_lows_cy)
+    temps_cy['rl'] = df_rl_cy[0].values
+    temps_cy['rh'] = df_rh_cy[0].values
+    print(temps_cy)
     if period == 'spring':
         temps = temps_cy[temps_cy.index.month.isin([3,4,5])]
-        print(temps)
         df_record_highs_ly = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
         df_record_lows_ly = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(03-)|(04-)|(05-)')]
         df_high_norms = df_norms[3][90:182]
@@ -397,14 +408,16 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
                 marker = {'color':'slateblue'}
             ),
             go.Scatter(
-                y = df_record_highs_ly[0],
+                # y = df_record_highs_ly[0],
+                y = temps['rh'],
                 x = date_time,
                 # hoverinfo='none',
                 name='Record High',
                 marker = {'color':'red'}
             ),
             go.Scatter(
-                y = df_record_lows_ly[0],
+                # y = df_record_lows_ly[0],
+                y = temps['rl'],
                 x = date_time,
                 # hoverinfo='none',
                 name='Record Low',

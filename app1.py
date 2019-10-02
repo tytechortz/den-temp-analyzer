@@ -4,22 +4,16 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
 import pandas as pd
-import sqlite3
 from dash.dependencies import Input, Output, State
-import time
 from datetime import datetime, date, timedelta
 from pandas import Series
 from scipy import stats
 from scipy.stats import norm 
 from numpy import arange,array,ones 
-import dash_table 
-import psycopg2
 from psycopg2 import pool
-import operator
 from dash.exceptions import PreventUpdate
 from sqlalchemy import create_engine
-import json
-import csv
+import json, csv, psycopg2, dash_table, time, operator
 from conect import norm_records, rec_lows, rec_highs, all_temps
  
 current_year = datetime.now().year
@@ -40,7 +34,12 @@ df_rec_highs = pd.DataFrame(rec_highs)
 
 df_all_temps = pd.DataFrame(all_temps)
 df_all_temps[2] = pd.to_datetime(df_all_temps[2])
+print(df_all_temps)
+last_day = df_all_temps.iloc[-1, 2].strftime("%Y-%m-%d")
 df_all_temps = df_all_temps.set_index([2])
+
+
+print(last_day)
 
 df_ya_max = df_all_temps.resample('Y').mean()
 df5 = df_ya_max[:-1]
@@ -145,24 +144,24 @@ body = dbc.Container([
 
 #     temperatures = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=' + today + '&units=standard')
 
-    # print(temperatures)
+#     print(temperatures)
 
-    # most_recent_data_date = temperatures['DATE'].iloc[-1]
+#     most_recent_data_date = temperatures['DATE'].iloc[-1]
 
-    # print(most_recent_data_date)
-    # engine = create_engine('postgresql://postgres:1234@localhost:5432/denver_temps')
-    # temperatures.to_sql('temps', engine, if_exists='do nothing')
+#     print(most_recent_data_date)
+#     engine = create_engine('postgresql://postgres:1234@localhost:5432/denver_temps')
+#     temperatures.to_sql('temps', engine, if_exists='do nothing')
 
 
     
     # try:
-        # connection = psycopg2.connect(user = "postgres",
-        #                             password = "1234",
-        #                             host = "localhost",
-        #                             database = "denver_temps")
-        # cursor = connection.cursor()
+    #     connection = psycopg2.connect(user = "postgres",
+    #                                 password = "1234",
+    #                                 host = "localhost",
+    #                                 database = "denver_temps")
+    #     cursor = connection.cursor()
 
-        # temperatures.to_sql('temps', engine, if_exists='replace')
+    #     temperatures.to_sql('temps', engine, if_exists='replace')
     
     # except (Exception, psycopg2.Error) as error :
     #     print ("Error while fetching data from PostgreSQL", error)
@@ -305,18 +304,15 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     df_record_lows_ly = df_record_lows_ly.set_index(1)
     df_rl_cy = df_record_lows_ly[:len(temps_cy.index)]
     df_rh_cy = df_record_highs_ly[:len(temps_cy.index)]
-    # print(df_rl_cy)
+    
     df_norms = pd.read_json(norms)
     df_norms_cy = df_norms[:len(temps_cy.index)]
-    # print(df_norms)
-    # print(df_record_lows_cy)
+  
     temps_cy.loc[:,'rl'] = df_rl_cy[0].values
     temps_cy.loc[:,'rh'] = df_rh_cy[0].values
     temps_cy.loc[:,'nh'] = df_norms_cy[3].values
     temps_cy.loc[:,'nl'] = df_norms_cy[4].values
-    # print(temps_cy)
-
-
+   
     if period == 'spring':
         temps = temps_cy[temps_cy.index.month.isin([3,4,5])]
         nh_value = temps['nh']
@@ -361,7 +357,6 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         temp_frames = [temps_py, temps_cy]
         temps = pd.concat(temp_frames)
         date_time = date_time[:91]  
-        # print(temps)
         
         df_record_highs_jan_feb = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(01-)|(02-)')]
         df_record_highs_dec = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(12-)')]
@@ -409,36 +404,28 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
                 hovertemplate = 'Temp Range: %{y} - %{base}<extra></extra>'                  
             ),
             go.Scatter(
-                # y = df_high_norms,
                 y = nh_value,
-                # x = date_time,
                 x = bar_x,
                 # hoverinfo='none',
                 name='Normal High',
                 marker = {'color':'indianred'}
             ),
             go.Scatter(
-                # y = df_low_norms,
                 y = nl_value,
-                # x = date_time,
                 x = bar_x,
                 # hoverinfo='none',
                 name='Normal Low',
                 marker = {'color':'slateblue'}
             ),
             go.Scatter(
-                # y = df_record_highs_ly[0],
                 y = rh_value,
-                # x = date_time,
                 x = bar_x,
                 # hoverinfo='none',
                 name='Record High',
                 marker = {'color':'red'}
             ),
             go.Scatter(
-                # y = df_record_lows_ly[0],
                 y = rl_value,
-                # x = date_time,
                 x = bar_x,
                 # hoverinfo='none',
                 name='Record Low',

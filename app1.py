@@ -312,16 +312,18 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     df_record_highs_ly = pd.read_json(rec_highs)
     df_record_highs_ly = df_record_highs_ly.set_index(1)
     df_record_lows_ly = pd.read_json(rec_lows)
-   
     df_record_lows_ly = df_record_lows_ly.set_index(1)
     df_rl_cy = df_record_lows_ly[:len(temps_cy.index)]
     df_rh_cy = df_record_highs_ly[:len(temps_cy.index)]
     print(df_rl_cy)
     df_norms = pd.read_json(norms)
-    print(temps_cy)
+    df_norms_cy = df_norms[:len(temps_cy.index)]
+    print(df_norms)
     # print(df_record_lows_cy)
-    temps_cy['rl'] = df_rl_cy[0].values
-    temps_cy['rh'] = df_rh_cy[0].values
+    temps_cy.loc[:,'rl'] = df_rl_cy[0].values
+    temps_cy.loc[:,'rh'] = df_rh_cy[0].values
+    temps_cy.loc[:,'nh'] = df_norms_cy[3].values
+    temps_cy.loc[:,'nl'] = df_norms_cy[4].values
     print(temps_cy)
     if period == 'spring':
         temps = temps_cy[temps_cy.index.month.isin([3,4,5])]

@@ -1,6 +1,7 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output, State
 from datetime import datetime, date, timedelta
@@ -92,6 +93,9 @@ app.layout = html.Div(
                 html.Div(
                     id='year-picker'
                 ),
+                html.Div(
+                    id='date-picker'
+                ),
             ],
                 className='two-columns',
             ),  
@@ -102,6 +106,9 @@ app.layout = html.Div(
             html.Div([
                 html.Div(
                     id='graph-stuff'
+                ),
+                html.Div(
+                    id='climate-day-stuff'
                 ),
             ],
                  className='eight columns'
@@ -196,15 +203,15 @@ def display_time_param(product_value):
     Output('year-picker', 'children'),
     [Input('product', 'value')])
 def display_year_selector(product_value):
-    if product_value == 'temp-graph' or 'fyma':
+    if product_value == 'temp-graph':
         return dcc.Input(
                     id = 'year',
                     type = 'number',
                     value = str(current_year),
                     min = 1950, max = current_year
                 )
-    elif product_value == 'daily-data-month':
-        return
+    # elif product_value == 'daily-data-month':
+    #     return
 
 @app.callback(
     Output('period-picker', 'children'),
@@ -236,6 +243,27 @@ def display_period_selector(product_value):
                 )
 
 @app.callback(
+    Output('date-picker', 'children'),
+    [Input('product', 'value')])
+    # Input('year', 'value')])
+def display_date_selector(product_value):
+    if product_value == 'climate-for-day':
+        return  dcc.DatePickerSingle(
+                    id = 'climate-date-picker-single',
+                    display_format='MM-DD'
+                )
+    # elif product_value == 'fyma':
+    #     return  dcc.RadioItems(
+    #                 id = 'temp-param',
+    #                 options = [
+    #                     {'label':'Max Temp', 'value':'Tmax'},
+    #                     {'label':'Min Temp', 'value':'Tmin'},
+    #                 ],
+    #                 value = 'Tmax',
+    #                 labelStyle = {'display':'block'}
+    #             )
+
+@app.callback(
     Output('graph-stuff', 'children'),
     [Input('product', 'value')])
 def display_graph(value):
@@ -243,6 +271,31 @@ def display_graph(value):
         return dcc.Graph(id='graph1')
     elif value == 'fyma':
         return dcc.Graph(id='fyma') 
+
+@app.callback(
+    Output('climate-day-stuff', 'children'),
+    [Input('product', 'value')])
+def display_climate_stuff(value):
+    if value == 'climate-for-day':
+        return dash_table.DataTable(id='climate-day-table')
+    # elif value == 'fyma':
+    #     return dcc.Graph(id='fyma') 
+
+@app.callback(
+    Output('climate-day-table', 'children'),
+    [Input('temp-data', 'children'),
+    Input('date', 'value')])
+def display_climate_day_table(temp_data, value):
+
+
+    columns=[
+        {"name": i, "id": i, "deletable": True, "selectable": True} for i in df_all_temps.columns
+    ],
+    data=df_all_temps.to_dict('records')
+
+    return data
+
+
 
 @app.callback(Output('graph1', 'figure'),
              [Input('temp-data', 'children'),

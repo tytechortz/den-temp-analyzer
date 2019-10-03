@@ -60,7 +60,7 @@ app.layout = html.Div(
         ),
         html.Div([
             html.H4(
-                '{} to {}'.format(startyr,startyr),
+                '1950-01-01 to {}'.format(ld),
                 className='twelve columns',
                 style={'text-align': 'center'}
             ),

@@ -1,17 +1,19 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output, State
 
 
 app = dash.Dash(__name__)
 app.config['suppress_callback_exceptions']=True
+
 
 app.layout = html.Div(
     [
         html.Div([
             html.H1(
                 'DENVER TEMPERATURE RECORD',
-                className='eight columns',
+                className='twelve columns',
                 style={'text-align': 'center'}
             ),
         ],
@@ -32,11 +34,41 @@ app.layout = html.Div(
                     labelStyle={'display': 'block'},
                 ),
             ],
-                className='two columns',
+                className='three columns',
             ),
-        ])
-    ]
+            html.Div([
+                html.Label('Options'),
+                html.Div(
+                    id='year-picker'
+                ),
+            ],
+                className='two-columns',
+            ),  
+        ],
+            className='row'
+        ),
+    ],
+    # style={
+    #     'width': '85%',
+    #     'max-width': '1200',
+    #     'margin-left': 'auto',
+    #     'margin-right': 'auto',
+    #     'font-family': 'overpass',
+    #     'background-color': '#F3F3F3',
+    #     'padding': '40',
+    #     'padding-top': '20',
+    #     'padding-bottom': '20',
+    # },
 )
+
+@app.callback(
+    Output('time-param', 'children'),
+    [Input('product', 'value')])
+def display_time_param(product_value):
+    if product_value == 'daily-data-month':
+        return html.Div('Date:')
+    elif product_value == 'temp-graph':
+        return html.Div([html.H3('Year:')])
 
 
 if __name__ == "__main__":

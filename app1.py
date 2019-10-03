@@ -295,7 +295,7 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     previous_year = int(selected_year) - 1
     selected_year = selected_year
     temps = df_all_temps
-
+    print(selected_year)
     temps[6] = temps.index.day_name()
     temps[5] = temps[3] - temps[4]
    

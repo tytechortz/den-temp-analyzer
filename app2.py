@@ -1,7 +1,7 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_table
+import dash_table as dt
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output, State
 from datetime import datetime, date, timedelta
@@ -94,7 +94,7 @@ app.layout = html.Div(
                     id='year-picker'
                 ),
                 html.Div(
-                    id='day-of-year-picker'
+                    id='date-picker'
                 ),
             ],
                 className='two-columns',
@@ -243,26 +243,16 @@ def display_period_selector(product_value):
                 )
 
 @app.callback(
-    Output('day-of-year-picker', 'children'),
+    Output('date-picker', 'children'),
     [Input('product', 'value')])
     # Input('year', 'value')])
 def display_date_selector(product_value):
     if product_value == 'climate-for-day':
         return  dcc.DatePickerSingle(
-                    id='day-of-year-picker',
+                    id='date',
                     display_format='MM-DD',
                     date=today
                 )
-    # elif product_value == 'fyma':
-    #     return  dcc.RadioItems(
-    #                 id = 'temp-param',
-    #                 options = [
-    #                     {'label':'Max Temp', 'value':'Tmax'},
-    #                     {'label':'Min Temp', 'value':'Tmin'},
-    #                 ],
-    #                 value = 'Tmax',
-    #                 labelStyle = {'display':'block'}
-    #             )
 
 @app.callback(
     Output('graph-stuff', 'children'),
@@ -278,23 +268,57 @@ def display_graph(value):
     [Input('product', 'value')])
 def display_climate_stuff(value):
     if value == 'climate-for-day':
-        return dash_table.DataTable(id='climate-day-table')
+        return dt.DataTable(id='climate-day-table',data=[{}], columns=[{}], fixed_rows=[{}])
     # elif value == 'fyma':
     #     return dcc.Graph(id='fyma') 
 
 @app.callback(
-    Output('climate-day-table', 'children'),
+    Output('climate-day-table', 'columns'),
     [Input('temp-data', 'children'),
-    Input('date', 'value')])
-def display_climate_day_table(temp_data, value):
+    Input('date', 'date')])
+def display_climate_day_table(temp_data, date):
+    
+    # columns=([
+    #     {"name": i, "id": i, "deletable": True, "selectable": True} for i in df_all_temps.columns
+    # ]),
+    data = df_all_temps.to_dict('records')
+    
+    # layout = dt.DataTable(
+    #     id='daily-data-table',
+    #     data=data,
+    #     columns=columns
+    # )
 
+    return [{"name": i, "id": i, "deletable": True, "selectable": True} for i in df_all_temps.columns]
 
-    columns=[
-        {"name": i, "id": i, "deletable": True, "selectable": True} for i in df_all_temps.columns
-    ],
-    data=df_all_temps.to_dict('records')
+@app.callback(
+    Output('climate-day-table', 'data'),
+    [Input('temp-data', 'children'),
+    Input('date', 'date')])
+def display_climate_day_table(temp_data, date):
+    
+    # columns=([
+    #     {"name": i, "id": i, "deletable": True, "selectable": True} for i in df_all_temps.columns
+    # ]),
+    # data = df_all_temps.to_dict('records')
+    
+    # layout = dt.DataTable(
+    #     id='daily-data-table',
+    #     data=data,
+    #     columns=columns
+    # )
 
-    return data
+    return df_all_temps.to_dict('records')
+
+# @app.callback(
+#     Output('climate-day-table', 'data'),
+#     [Input('temp-data', 'children'),
+#     Input('date', 'value')])
+# def display_climate_day_table(temp_data, value):
+
+#     data=df_all_temps.to_dict('records')
+
+#     return data
 
 
 

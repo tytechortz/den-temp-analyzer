@@ -18,7 +18,23 @@ app.layout = html.Div(
             className='row'
         ),
         html.Hr(style={'margin': '0', 'margin-bottom': '5'}),
-        
+        html.Div([
+            html.Div([
+                html.Label('Select Product'),
+                dcc.RadioItems(
+                    id='product',
+                    options=[
+                        {'label':'Daily data for a month', 'value':'daily-data-month'},
+                        {'label':'Temperature graphs', 'value':'temp-graph'},
+                        {'label':'Calendar day summaries', 'value':'cal-day-summary'},
+                        {'label':'5 Year Moving Avgs', 'value':'fyma'},
+                    ],
+                    labelStyle={'display': 'block'},
+                ),
+            ],
+                className='two columns',
+            ),
+        ])
     ]
 )
 

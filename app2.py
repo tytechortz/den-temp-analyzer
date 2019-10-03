@@ -94,7 +94,7 @@ app.layout = html.Div(
                     id='year-picker'
                 ),
                 html.Div(
-                    id='date-picker'
+                    id='day-of-year-picker'
                 ),
             ],
                 className='two-columns',
@@ -243,14 +243,15 @@ def display_period_selector(product_value):
                 )
 
 @app.callback(
-    Output('date-picker', 'children'),
+    Output('day-of-year-picker', 'children'),
     [Input('product', 'value')])
     # Input('year', 'value')])
 def display_date_selector(product_value):
     if product_value == 'climate-for-day':
         return  dcc.DatePickerSingle(
-                    id = 'climate-date-picker-single',
-                    display_format='MM-DD'
+                    id='day-of-year-picker',
+                    display_format='MM-DD',
+                    date=today
                 )
     # elif product_value == 'fyma':
     #     return  dcc.RadioItems(

@@ -58,6 +58,15 @@ app.layout = html.Div(
         ],
             className='row'
         ),
+        html.Div([
+            html.H4(
+                '{} to {}'.format(startyr,startyr),
+                className='twelve columns',
+                style={'text-align': 'center'}
+            ),
+        ],
+            className='row'
+        ),
         html.Hr(style={'margin': '0', 'margin-bottom': '5'}),
         html.Div([
             html.Div([

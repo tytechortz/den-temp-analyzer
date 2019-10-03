@@ -277,36 +277,24 @@ def display_climate_stuff(value):
     [Input('temp-data', 'children'),
     Input('date', 'date')])
 def display_climate_day_table(temp_data, date):
-    
-    # columns=([
-    #     {"name": i, "id": i, "deletable": True, "selectable": True} for i in df_all_temps.columns
-    # ]),
-    data = df_all_temps.to_dict('records')
-    
-    # layout = dt.DataTable(
-    #     id='daily-data-table',
-    #     data=data,
-    #     columns=columns
-    # )
+    print(df_all_temps)
+    columns=[
+        {'Date': df_all_temps.index}
+    ]
 
-    return [{"name": i, "id": i, "deletable": True, "selectable": True} for i in df_all_temps.columns]
+    # return [{"name": i, "id": i, "deletable": True, "selectable": True} for i in df_all_temps.columns]
+    return columns
 
 @app.callback(
     Output('climate-day-table', 'data'),
     [Input('temp-data', 'children'),
     Input('date', 'date')])
 def display_climate_day_table(temp_data, date):
-    
-    # columns=([
-    #     {"name": i, "id": i, "deletable": True, "selectable": True} for i in df_all_temps.columns
-    # ]),
+    print(int(date[5:7]))
+
+    dr = df_all_temps[(df_all_temps.index.month == int(date[5:7])) & (df_all_temps.index.day == int(date[8:10]))]
     # data = df_all_temps.to_dict('records')
-    
-    # layout = dt.DataTable(
-    #     id='daily-data-table',
-    #     data=data,
-    #     columns=columns
-    # )
+    print(dr)
 
     return df_all_temps.to_dict('records')
 

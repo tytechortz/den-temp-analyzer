@@ -112,11 +112,16 @@ app.layout = html.Div(
                     id='graph-stuff'
                 ),
                 html.Div(
-                    id='climate-day-stuff'
+                    id='climate-day-graph'
                 ),
             ],
                  className='eight columns'
-            ),     
+            ),
+            html.Div([
+                html.Div(
+                    id='climate-day-stuff'
+                ),
+            ])     
         ],
             className='row'
         ),
@@ -272,9 +277,19 @@ def display_graph(value):
     [Input('product', 'value')])
 def display_climate_stuff(value):
     if value == 'climate-for-day':
-        return dt.DataTable(id='climate-day-table',data=[{}], columns=[{}], fixed_rows=[{}])
-    # elif value == 'fyma':
-    #     return dcc.Graph(id='fyma') 
+        return dt.DataTable(id='climate-day-table',
+        data=[{}], 
+        columns=[{}], 
+        fixed_rows=[{}],
+        style_cell_conditional=[
+            {'if': {'column_id': 'Date'},
+            'width':'130px'},
+            {'if': {'column_id': 'TMAX'},
+            'width':'130px'},
+            {'if': {'column_id': 'TMIN'},
+            'width':'130px'},
+        ])
+
 
 @app.callback(
     Output('climate-day-table', 'columns'),
@@ -284,11 +299,9 @@ def display_climate_day_table(temp_data, date):
     df_all_temps_new = df_all_temps.reset_index()
     
     columns=[
-        # {'Date': df_all_temps.index, 'TMAX': df_all_temps['TMAX'], 'TMIN': df_all_temps['TMIN']}
         {'name': i, 'id': i} for i in df_all_temps_new.columns
     ]
-    print(columns)
-    # return [{"name": i, "id": i, "deletable": True, "selectable": True} for i in df_all_temps.columns]
+  
     return columns
 
 @app.callback(
@@ -296,29 +309,12 @@ def display_climate_day_table(temp_data, date):
     [Input('temp-data', 'children'),
     Input('date', 'date')])
 def display_climate_day_table(temp_data, date):
-    # print(int(date[5:7]))
     dr = df_all_temps[(df_all_temps.index.month == int(date[5:7])) & (df_all_temps.index.day == int(date[8:10]))]
-    # data = df_all_temps.to_dict('records')
-    print(dr)
-    
     dr = dr.reset_index()
     
     dr['Date'] = dr['Date'].dt.strftime('%Y-%m-%d')
-    
 
     return dr.to_dict('records')
-
-# @app.callback(
-#     Output('climate-day-table', 'data'),
-#     [Input('temp-data', 'children'),
-#     Input('date', 'value')])
-# def display_climate_day_table(temp_data, value):
-
-#     data=df_all_temps.to_dict('records')
-
-#     return data
-
-
 
 @app.callback(Output('graph1', 'figure'),
              [Input('temp-data', 'children'),

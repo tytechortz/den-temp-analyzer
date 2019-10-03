@@ -26,11 +26,15 @@ df_rec_lows = pd.DataFrame(rec_lows)
 
 df_rec_highs = pd.DataFrame(rec_highs)
 
-df_all_temps = pd.DataFrame(all_temps)
-df_all_temps[2] = pd.to_datetime(df_all_temps[2])
+df_all_temps = pd.DataFrame(all_temps,columns=['dow','sta','Date','TMAX','TMIN'])
+# print(df_table_temps)
+df_table_temps = df_all_temps
+df_all_temps['Date'] = pd.to_datetime(df_all_temps['Date'])
 last_day = df_all_temps.iloc[-1, 2] + timedelta(days=1)
 ld = last_day.strftime("%Y-%m-%d")
-df_all_temps = df_all_temps.set_index([2])
+df_all_temps = df_all_temps.set_index(['Date'])
+df_all_temps = df_all_temps.drop(['dow','sta'], axis=1)
+print(df_all_temps)
 
 df_ya_max = df_all_temps.resample('Y').mean()
 df5 = df_ya_max[:-1]
@@ -277,11 +281,13 @@ def display_climate_stuff(value):
     [Input('temp-data', 'children'),
     Input('date', 'date')])
 def display_climate_day_table(temp_data, date):
-    print(df_all_temps)
+    df_all_temps_new = df_all_temps.reset_index()
+    
     columns=[
-        {'Date': df_all_temps.index}
+        # {'Date': df_all_temps.index, 'TMAX': df_all_temps['TMAX'], 'TMIN': df_all_temps['TMIN']}
+        {'name': i, 'id': i} for i in df_all_temps_new.columns
     ]
-
+    print(columns)
     # return [{"name": i, "id": i, "deletable": True, "selectable": True} for i in df_all_temps.columns]
     return columns
 
@@ -290,13 +296,17 @@ def display_climate_day_table(temp_data, date):
     [Input('temp-data', 'children'),
     Input('date', 'date')])
 def display_climate_day_table(temp_data, date):
-    print(int(date[5:7]))
-
+    # print(int(date[5:7]))
     dr = df_all_temps[(df_all_temps.index.month == int(date[5:7])) & (df_all_temps.index.day == int(date[8:10]))]
     # data = df_all_temps.to_dict('records')
     print(dr)
+    
+    dr = dr.reset_index()
+    
+    dr['Date'] = dr['Date'].dt.strftime('%Y-%m-%d')
+    
 
-    return df_all_temps.to_dict('records')
+    return dr.to_dict('records')
 
 # @app.callback(
 #     Output('climate-day-table', 'data'),

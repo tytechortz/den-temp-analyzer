@@ -404,7 +404,8 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
                 base = temps[4],
                 name='Temp Range',
                 marker = mkr_color,
-                hovertemplate = 'Temp Range: %{y} - %{base}<extra></extra>'                  
+                hovertemplate = 'Temp Range: %{y} - %{base}<extra></extra><br>'
+                                # 'Record High: %{temps[6]}'                  
             ),
             go.Scatter(
                 y = nh_value,

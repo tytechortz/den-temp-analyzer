@@ -34,7 +34,7 @@ last_day = df_all_temps.iloc[-1, 2] + timedelta(days=1)
 ld = last_day.strftime("%Y-%m-%d")
 df_all_temps = df_all_temps.set_index(['Date'])
 df_all_temps = df_all_temps.drop(['dow','sta'], axis=1)
-print(df_all_temps)
+# print(df_all_temps)
 
 df_ya_max = df_all_temps.resample('Y').mean()
 df5 = df_ya_max[:-1]
@@ -112,7 +112,7 @@ app.layout = html.Div(
                     id='graph-stuff'
                 ),
                 html.Div(
-                    id='climate-day-graph'
+                    id='datatable-interactivity-container'
                 ),
             ],
                  className='eight columns'
@@ -271,41 +271,105 @@ def display_graph(value):
         return dcc.Graph(id='graph1')
     elif value == 'fyma':
         return dcc.Graph(id='fyma') 
+    elif  value == 'climate-for-day':
+        return datatable-interactivity-container
 
 @app.callback(
     Output('climate-day-stuff', 'children'),
     [Input('product', 'value')])
 def display_climate_stuff(value):
     if value == 'climate-for-day':
-        return dt.DataTable(id='climate-day-table',
+        return dt.DataTable(id='datatable-interactivity',
         data=[{}], 
         columns=[{}], 
-        fixed_rows=[{}],
+        fixed_rows={'headers': True, 'data': 0},
         style_cell_conditional=[
             {'if': {'column_id': 'Date'},
-            'width':'130px'},
+            'width':'140px'},
             {'if': {'column_id': 'TMAX'},
-            'width':'130px'},
+            'width':'140px'},
             {'if': {'column_id': 'TMIN'},
-            'width':'130px'},
-        ])
-
+            'width':'140px'},
+        ],
+        # editable=True,
+        # filter_action="native",
+        sort_action='native',
+        sort_mode="multi",
+        page_size= 10,
+        page_current= 0,
+        column_selectable="single",
+        row_selectable="multi",
+        selected_columns=[],
+        selected_rows=[],
+        page_action="native",
+        # style_table={
+        #     'maxHeight': '500',
+        #     'overflowY': 'scroll'
+        # },
+        )
 
 @app.callback(
-    Output('climate-day-table', 'columns'),
+    Output('datatable-interactivity-container', 'children'),
+    [Input('datatable-interactivity', 'derived_virtual_data'),
+    Input('datatable-interactivity', 'derived_virtual_selected_rows')])
+def update_graphs(rows, derived_virtual_selected_rows):
+    if derived_virtual_selected_rows is None:
+        derived_virtual_selected_rows = []
+
+    dff = df_table_temps if rows is None else pd.DataFrame(rows)
+    print(dff)
+    colors = ['#7FDBFF' if i in derived_virtual_selected_rows else '#0074D9'
+              for i in range(len(dff))]
+    
+    return [
+        dcc.Graph(
+            id="TMAX",
+            figure={
+                'data': [
+                    {
+                        "x": dff["Date"],
+                        "y": dff["TMAX"],
+                        "type": "bar",
+                        # "marker": {"color": colors},
+                        "marker": {"color": colors},
+                    }
+                ],
+                "layout": {
+                    "xaxis": {"automargin": True},
+                    "yaxis": {
+                        "automargin": True,
+                        "title": {"text": dff["TMAX"]}
+                    },
+                    "height": 350,
+                    "margin": {"t": 10, "l": 10, "r": 10},
+                },
+            },
+        )
+    ]
+
+@app.callback(
+    Output('datatable-interactivity', 'style_data_conditional'),
+    [Input('datatable-interactivity', 'selected_columns')]
+)
+def update_styles(selected_columns):
+    return [{
+        'if': { 'column_id': i },
+        'background_color': '#D2F3FF'
+    } for i in selected_columns]
+
+@app.callback(
+    Output('datatable-interactivity', 'columns'),
     [Input('temp-data', 'children'),
     Input('date', 'date')])
 def display_climate_day_table(temp_data, date):
     df_all_temps_new = df_all_temps.reset_index()
-    
     columns=[
-        {'name': i, 'id': i} for i in df_all_temps_new.columns
+        {"name": i, "id": i, "selectable": True} for i in df_all_temps_new.columns
     ]
-  
     return columns
 
 @app.callback(
-    Output('climate-day-table', 'data'),
+    Output('datatable-interactivity', 'data'),
     [Input('temp-data', 'children'),
     Input('date', 'date')])
 def display_climate_day_table(temp_data, date):

@@ -70,6 +70,7 @@ app.layout = html.Div(
         ),
         html.Div([
             html.H4(
+                id='title-date-range',
                 # '1950-01-01 to {}'.format(ld),
                 className='twelve columns',
                 style={'text-align': 'center'}
@@ -84,11 +85,12 @@ app.layout = html.Div(
                 dcc.RadioItems(
                     id='product',
                     options=[
-                        {'label':'Climatology for a day', 'value':'climate-for-day'},
                         {'label':'Temperature graphs', 'value':'temp-graph'},
+                        {'label':'Climatology for a day', 'value':'climate-for-day'},
                         {'label':'Calendar day summaries', 'value':'cal-day-summary'},
                         {'label':'5 Year Moving Avgs', 'value':'fyma'},
                     ],
+                    value='temp-graph',
                     labelStyle={'display': 'block'},
                 ),
             ],
@@ -158,6 +160,16 @@ app.layout = html.Div(
     #     'padding-bottom': '20',
     # },
 )
+
+@app.callback(Output('title-date-range', 'children'),
+            [Input('product', 'value'),
+            Input('all-data', 'children')])
+def all_temps_cleaner(product, temps):
+    title_temps = pd.read_json(temps)
+    title_temps['Date']=title_temps['Date'].dt.strftime("%Y-%m-%d")
+    print(title_temps)
+    ld='1999'
+    return '1950-01-01 to {}'.format(ld),
 
 @app.callback(Output('all-data', 'children'),
             [Input('product', 'value')])

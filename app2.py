@@ -19,6 +19,7 @@ current_year = datetime.now().year
 today = time.strftime("%Y-%m-%d")
 startyr = 1950
 year_count = current_year-startyr
+print(year_count)
 
 df_norms = pd.DataFrame(norm_records)
 
@@ -147,6 +148,9 @@ app.layout = html.Div(
         html.Div(id='rec-lows', style={'display': 'none'}),
         html.Div(id='norms', style={'display': 'none'}),
         html.Div(id='all-data', style={'display': 'none'}),
+        html.Div(id='df5', style={'display': 'none'}),
+        html.Div(id='max-trend', style={'display': 'none'}),
+        html.Div(id='min-trend', style={'display': 'none'}),
     ],
     # style={
     #     'width': '85%',
@@ -167,11 +171,40 @@ app.layout = html.Div(
 def all_temps_cleaner(product, temps):
     title_temps = pd.read_json(temps)
     title_temps['Date']=title_temps['Date'].dt.strftime("%Y-%m-%d")
-    print(title_temps)
     last_day = title_temps.iloc[-1, 0] 
-    print(last_day)
     
     return '1950-01-01 through {}'.format(last_day)
+
+@app.callback(
+    Output('df5', 'children'),
+    [Input('all-data', 'children'),
+    Input('product', 'value')])
+def display_climate_day_table(all_data, product_value):
+    title_temps = pd.read_json(all_data)
+    title_temps['Date']=title_temps['Date'].dt.strftime("%Y-%m-%d")
+    df_date_index = df_all_temps.set_index(['Date'])
+    df_ya_max = df_date_index.resample('Y').mean()
+    df5 = df_ya_max[:-1]
+    df5 = df5.drop(['dow'], axis=1)
+    # print(df5)
+    
+    return df5.to_json(date_format='iso')
+
+@app.callback(
+    Output('max-trend', 'children'),
+    [Input('df5', 'children'),
+    Input('product', 'value')])
+def all_max_trend(df_5, product_value):
+    df5 = pd.read_json(df_5)
+    # df5 = df_ya_max[:-1]
+    print(df5)
+    # df5.index = 
+    xi = arange(0,year_count)
+    slope, intercept, r_value, p_value, std_err = stats.linregress(xi,df5['TMAX'])
+    # max_trend = (slope*xi+intercept)
+    # print(max_trend)
+    return (slope*xi+intercept)
+
 
 @app.callback(Output('all-data', 'children'),
             [Input('product', 'value')])
@@ -180,9 +213,6 @@ def all_temps_cleaner(product):
     cleaned_all_temps.columns=['dow','sta','Date','TMAX','TMIN']
     cleaned_all_temps['Date'] = pd.to_datetime(cleaned_all_temps['Date'])
     cleaned_all_temps = cleaned_all_temps.drop(['dow','sta'], axis=1)
-
-    # last_day = df_all_temps.iloc[-1, 2] + timedelta(days=1)
-    # ld = last_day.strftime("%Y-%m-%d")
 
     return cleaned_all_temps.to_json(date_format='iso')
 
@@ -203,7 +233,6 @@ def all_temps(selected_year, period):
         temp_records = cursor.fetchall()
         df = pd.DataFrame(temp_records)
         
-      
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
     
@@ -406,17 +435,6 @@ def update_graphs(rows, derived_virtual_selected_rows, value):
 #         'background_color': '#D2F3FF'
 #     } for i in selected_columns]
 
-# @app.callback(
-#     Output('datatable-interactivity', 'columns'),
-#     [Input('temp-data', 'children'),
-#     Input('date', 'date')])
-# def display_climate_day_table(temp_data, date):
-#     # df_data_table = df_date_index
-    
-#     columns=[
-#         {"name": i, "id": i, "deletable": True, "selectable": True} for i in df_date_index.columns
-#     ]
-#     return columns
 
 @app.callback([
     Output('datatable-interactivity', 'data'),
@@ -482,7 +500,6 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     
    
     temps_cy = temps[temps.index.year.isin([selected_year])]
-    # print(temps_cy)
     temps_py = temps[temps.index.year.isin([previous_year])]
     df_record_highs_ly = pd.read_json(rec_highs)
     df_record_highs_ly = df_record_highs_ly.set_index(1)
@@ -498,7 +515,7 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     temps_cy.loc[:,'rh'] = df_rh_cy[0].values
     temps_cy.loc[:,'nh'] = df_norms_cy[3].values
     temps_cy.loc[:,'nl'] = df_norms_cy[4].values
-    print(temps_cy)
+    # print(temps_cy)
    
     if period == 'spring':
         temps = temps_cy[temps_cy.index.month.isin([3,4,5])]
@@ -632,13 +649,25 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
 @app.callback(Output('fyma', 'figure'),
              [Input('year', 'value'),
              Input('temp-param', 'value'),
-             Input('all-data', 'children')])
-def update_figure(selected_year, selected_param, all_data):
+             Input('all-data', 'children'),
+             Input('max-trend', 'children'),
+             Input('product', 'value'),
+             Input('df5', 'children')])
+def update_figure(selected_year, selected_param, all_data, max_trend, product_value, df_5):
     print(selected_param)
     fyma_temps = pd.read_json(all_data)
     fyma_temps['Date']=fyma_temps['Date'].dt.strftime("%Y-%m-%d") 
-
-    print(fyma_temps)
+    all_max_temp_fit = pd.DataFrame(max_trend)
+    print(all_max_temp_fit)
+    print(type(all_max_temp_fit))
+    df_5 = pd.read_json(df_5)
+    print(df_5.index)
+    all_max_temp_fit.index = df_5.index
+    print(all_max_temp_fit)
+    all_max_temp_fit.index = all_max_temp_fit.index.strftime("%Y-%m-%d")
+    print(all_max_temp_fit.index)
+    # df_5.index=dt.strftime("%Y-%m-%d")
+    # print(fyma_temps)
     fyma_temps.set_index(['Date'], inplace=True)
     # print(fyma_temps)
     # fyma_temps = fyma_temps.loc['1950-1-1':str(selected_year)+'-1-1']
@@ -649,7 +678,7 @@ def update_figure(selected_year, selected_param, all_data):
 
     all_min_rolling = fyma_temps['TMIN'].dropna().rolling(window=1825)
     all_min_rolling_mean = all_min_rolling.mean()
-    # print(all_max_rolling)
+    print(type(all_max_rolling_mean))
 
     if selected_param == 'Tmax':
         trace = [
@@ -658,12 +687,13 @@ def update_figure(selected_year, selected_param, all_data):
                 x = fyma_temps.index,
                 name='Max Temp'
             ),
-            # go.Scatter(
-            #     y = all_max_temp_fit(),
-            #     x = df5.index,
-            #     name = 'trend',
-            #     line = {'color':'red'}
-            # ),
+            go.Scatter(
+                y = all_max_temp_fit[0],
+                # x = all_max_trend(all_max_temp_fit,product_value),
+                x = all_max_temp_fit.index,
+                name = 'trend',
+                line = {'color':'red'}
+            ),
         ]
     elif selected_param == 'Tmin':
         trace = [

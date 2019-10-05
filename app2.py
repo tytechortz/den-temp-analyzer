@@ -168,8 +168,10 @@ def all_temps_cleaner(product, temps):
     title_temps = pd.read_json(temps)
     title_temps['Date']=title_temps['Date'].dt.strftime("%Y-%m-%d")
     print(title_temps)
-    ld='1999'
-    return '1950-01-01 to {}'.format(ld),
+    last_day = title_temps.iloc[-1, 0] 
+    print(last_day)
+    
+    return '1950-01-01 through {}'.format(last_day)
 
 @app.callback(Output('all-data', 'children'),
             [Input('product', 'value')])
@@ -356,12 +358,12 @@ def update_graphs(rows, derived_virtual_selected_rows, value):
     if value == 'climate-for-day':
         if derived_virtual_selected_rows is None:
             derived_virtual_selected_rows = []
-        print(rows)
+        # print(rows)
         # df_all_temps = pd.DataFrame(all_temps,columns=['dow','sta','Date','TMAX','TMIN'])
 
         dff = pd.DataFrame(rows)
         # df_all_temps = df_all_temps.drop(['dow','sta'], axis=1)
-        print(dff)
+        # print(dff)
         colors = ['#7FDBFF' if i in derived_virtual_selected_rows else '#0074D9'
                 for i in range(len(dff))]
         
@@ -425,7 +427,7 @@ def display_climate_day_table(all_data, date):
     dr = pd.read_json(all_data)
     # dr['Date']=dr['Date'].dt.strftime("%Y-%m-%d") 
     dr.set_index(['Date'], inplace=True)
-    print(dr)
+    # print(dr)
     dr = dr[(dr.index.month == int(date[5:7])) & (dr.index.day == int(date[8:10]))]
     # dr = df_all_temps[(df_all_temps['Date'][5:7] == date[5:7]) & (df_all_temps['Date'][8:10] == date[8:10])]
     dr = dr.reset_index()
@@ -449,18 +451,18 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     previous_year = int(selected_year) - 1
     selected_year = selected_year
     temps = pd.read_json(temp_data)
-    print(temps)
+    # print(temps)
     temps = temps.drop([0,1], axis=1)
-    print(temps)
+    # print(temps)
     temps.columns = ['date','TMAX','TMIN']
-    print(temps)
+    # print(temps)
     temps['date'] = pd.to_datetime(temps['date'])
     temps = temps.set_index(['date'])
-    print(temps)
+    # print(temps)
     temps['dif'] = temps['TMAX'] - temps['TMIN']
-    print(temps)
+    # print(temps)
     
-    print(temps)
+    # print(temps)
     # df_all_temps = (temps,columns=['dow','sta','Date','TMAX','TMIN'])
     # print(df_all_temps)
     # df_table_temps = df_all_temps
@@ -638,11 +640,11 @@ def update_figure(selected_year, selected_param, all_data):
 
     print(fyma_temps)
     fyma_temps.set_index(['Date'], inplace=True)
-    print(fyma_temps)
+    # print(fyma_temps)
     # fyma_temps = fyma_temps.loc['1950-1-1':str(selected_year)+'-1-1']
     # print(fyma_temps)
     all_max_rolling = fyma_temps['TMAX'].dropna().rolling(window=1825)
-    print(all_max_rolling)
+    # print(all_max_rolling)
     all_max_rolling_mean = all_max_rolling.mean()
 
     all_min_rolling = fyma_temps['TMIN'].dropna().rolling(window=1825)

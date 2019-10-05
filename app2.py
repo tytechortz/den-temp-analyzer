@@ -407,10 +407,14 @@ def update_graphs(rows, derived_virtual_selected_rows, value):
 @app.callback([
     Output('datatable-interactivity', 'data'),
     Output('datatable-interactivity', 'columns')],
-    [Input('temp-data', 'children'),
+    [Input('all-data', 'children'),
     Input('date', 'date')])
-def display_climate_day_table(temp_data, date):
-    dr = df_date_index[(df_date_index.index.month == int(date[5:7])) & (df_date_index.index.day == int(date[8:10]))]
+def display_climate_day_table(all_data, date):
+    dr = pd.read_json(all_data)
+    # dr['Date']=dr['Date'].dt.strftime("%Y-%m-%d") 
+    dr.set_index(['Date'], inplace=True)
+    print(dr)
+    dr = dr[(dr.index.month == int(date[5:7])) & (dr.index.day == int(date[8:10]))]
     # dr = df_all_temps[(df_all_temps['Date'][5:7] == date[5:7]) & (df_all_temps['Date'][8:10] == date[8:10])]
     dr = dr.reset_index()
     # print(dr)
@@ -618,8 +622,6 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
 def update_figure(selected_year, selected_param, all_data):
     print(selected_param)
     fyma_temps = pd.read_json(all_data)
-    print(fyma_temps)
-    print(type(fyma_temps['Date'][0]))
     fyma_temps['Date']=fyma_temps['Date'].dt.strftime("%Y-%m-%d") 
 
     print(fyma_temps)

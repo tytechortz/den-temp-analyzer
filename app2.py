@@ -27,16 +27,17 @@ df_rec_lows = pd.DataFrame(rec_lows)
 df_rec_highs = pd.DataFrame(rec_highs)
 
 df_all_temps = pd.DataFrame(all_temps,columns=['dow','sta','Date','TMAX','TMIN'])
-# print(df_table_temps)
-df_table_temps = df_all_temps
+# print(all_temps)
+# df_table_temps = df_all_temps
 df_all_temps['Date'] = pd.to_datetime(df_all_temps['Date'])
 last_day = df_all_temps.iloc[-1, 2] + timedelta(days=1)
 ld = last_day.strftime("%Y-%m-%d")
-df_all_temps = df_all_temps.set_index(['Date'])
+# df_all_temps = df_all_temps.set_index(['Date'])
 df_all_temps = df_all_temps.drop(['dow','sta'], axis=1)
 # print(df_all_temps)
-
-df_ya_max = df_all_temps.resample('Y').mean()
+df_date_index = df_all_temps.set_index(['Date'])
+# print(df_date_index.columns)
+df_ya_max = df_date_index.resample('Y').mean()
 df5 = df_ya_max[:-1]
 
 # trend line equations for all temp graphs
@@ -46,6 +47,7 @@ def all_max_temp_fit():
     return (slope*xi+intercept)
 
 def all_min_temp_fit():
+    df5 = df_ya_max[:-1]
     xi = arange(0,year_count)
     slope, intercept, r_value, p_value, std_err = stats.linregress(xi,df5[4])
     return (slope*xi+intercept)
@@ -111,12 +113,20 @@ app.layout = html.Div(
                 html.Div(
                     id='graph-stuff'
                 ),
-                html.Div(
-                    id='datatable-interactivity-container'
-                ),
             ],
                  className='eight columns'
-            ),
+            ),    
+        ],
+            className='row'
+        ),
+        html.Div([
+            # html.Div([
+            #     html.Div(
+            #         id='datatable-interactivity-container'
+            #     ),
+            # ],
+            #      className='eight columns'
+            # ),
             html.Div([
                 html.Div(
                     id='climate-day-stuff'
@@ -125,6 +135,8 @@ app.layout = html.Div(
         ],
             className='row'
         ),
+
+
         html.Div(id='temp-data', style={'display': 'none'}),
         html.Div(id='rec-highs', style={'display': 'none'}),
         html.Div(id='rec-lows', style={'display': 'none'}),
@@ -155,10 +167,11 @@ def all_temps(selected_year, period):
                                     database = "denver_temps")
         cursor = connection.cursor()
 
-        postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) IN ({},{})'.format(selected_year, previous_year)
+        postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) IN ({},{}) ORDER BY "DATE" ASC'.format(selected_year, previous_year)
         cursor.execute(postgreSQL_select_year_Query)
         temp_records = cursor.fetchall()
         df = pd.DataFrame(temp_records)
+        
       
     except (Exception, psycopg2.Error) as error :
         print ("Error while fetching data from PostgreSQL", error)
@@ -271,8 +284,8 @@ def display_graph(value):
         return dcc.Graph(id='graph1')
     elif value == 'fyma':
         return dcc.Graph(id='fyma') 
-    elif  value == 'climate-for-day':
-        return datatable-interactivity-container
+    # elif  value == 'climate-for-day':
+    #     return dcc.Graph(id='TMAX'), dcc.Graph(id='TMIN')
 
 @app.callback(
     Output('climate-day-stuff', 'children'),
@@ -293,92 +306,104 @@ def display_climate_stuff(value):
         ],
         # editable=True,
         # filter_action="native",
-        sort_action='native',
+        sort_action="native",
         sort_mode="multi",
-        page_size= 10,
-        page_current= 0,
         column_selectable="single",
         row_selectable="multi",
+        row_deletable=True,
         selected_columns=[],
         selected_rows=[],
-        page_action="native",
-        # style_table={
-        #     'maxHeight': '500',
-        #     'overflowY': 'scroll'
-        # },
+        # page_action="native",
+        page_current= 0,
+        # page_size= 10,
         )
 
 @app.callback(
     Output('datatable-interactivity-container', 'children'),
     [Input('datatable-interactivity', 'derived_virtual_data'),
-    Input('datatable-interactivity', 'derived_virtual_selected_rows')])
-def update_graphs(rows, derived_virtual_selected_rows):
-    if derived_virtual_selected_rows is None:
-        derived_virtual_selected_rows = []
+    Input('datatable-interactivity', 'derived_virtual_selected_rows'),
+    Input('product', 'value')])
+def update_graphs(rows, derived_virtual_selected_rows, value):
+    if value == 'climate-for-day':
+        if derived_virtual_selected_rows is None:
+            derived_virtual_selected_rows = []
+        print(rows)
+        # df_all_temps = pd.DataFrame(all_temps,columns=['dow','sta','Date','TMAX','TMIN'])
 
-    dff = df_table_temps if rows is None else pd.DataFrame(rows)
-    print(dff)
-    colors = ['#7FDBFF' if i in derived_virtual_selected_rows else '#0074D9'
-              for i in range(len(dff))]
-    
-    return [
-        dcc.Graph(
-            id="TMAX",
-            figure={
-                'data': [
-                    {
-                        "x": dff["Date"],
-                        "y": dff["TMAX"],
-                        "type": "bar",
-                        # "marker": {"color": colors},
-                        "marker": {"color": colors},
-                    }
-                ],
-                "layout": {
-                    "xaxis": {"automargin": True},
-                    "yaxis": {
-                        "automargin": True,
-                        "title": {"text": dff["TMAX"]}
+        dff = pd.DataFrame(rows)
+        # df_all_temps = df_all_temps.drop(['dow','sta'], axis=1)
+        print(dff)
+        colors = ['#7FDBFF' if i in derived_virtual_selected_rows else '#0074D9'
+                for i in range(len(dff))]
+        
+        return [
+            dcc.Graph(
+                id=column,
+                figure={
+                    'data': [
+                        {
+                            "x": dff['Date'],
+                            "y": dff[column],
+                            "type": "bar",
+                            # "marker": {"color": colors},
+                            "marker": {"color": colors},
+                        }
+                    ],
+                    "layout": {
+                        "xaxis": {"automargin": True},
+                        "yaxis": {
+                            "automargin": True,
+                            "title": {"text": dff[column]}
+                        },
+                        "height": 250,
+                        "margin": {"t": 10, "l": 10, "r": 10},
                     },
-                    "height": 350,
-                    "margin": {"t": 10, "l": 10, "r": 10},
                 },
-            },
-        )
-    ]
+            )
+            for column in ['TMAX','TMIN'] 
+        ]
 
-@app.callback(
-    Output('datatable-interactivity', 'style_data_conditional'),
-    [Input('datatable-interactivity', 'selected_columns')]
-)
-def update_styles(selected_columns):
-    return [{
-        'if': { 'column_id': i },
-        'background_color': '#D2F3FF'
-    } for i in selected_columns]
+# @app.callback(
+#     Output('datatable-interactivity', 'style_data_conditional'),
+#     [Input('datatable-interactivity', 'selected_columns')])
+# def update_styles(selected_columns):
+#     # df_all_temps = pd.DataFrame(all_temps,columns=['dow','sta','Date','TMAX','TMIN'])
+#     # df_all_temps = df_all_temps.drop(['dow','sta'], axis=1)
+#     # df_all_temps['Date'] = pd.to_datetime(df_all_temps['Date'])
+#     return [{
+#         'if': { 'column_id': i },
+#         'background_color': '#D2F3FF'
+#     } for i in selected_columns]
 
-@app.callback(
-    Output('datatable-interactivity', 'columns'),
-    [Input('temp-data', 'children'),
-    Input('date', 'date')])
-def display_climate_day_table(temp_data, date):
-    df_all_temps_new = df_all_temps.reset_index()
-    columns=[
-        {"name": i, "id": i, "selectable": True} for i in df_all_temps_new.columns
-    ]
-    return columns
+# @app.callback(
+#     Output('datatable-interactivity', 'columns'),
+#     [Input('temp-data', 'children'),
+#     Input('date', 'date')])
+# def display_climate_day_table(temp_data, date):
+#     # df_data_table = df_date_index
+    
+#     columns=[
+#         {"name": i, "id": i, "deletable": True, "selectable": True} for i in df_date_index.columns
+#     ]
+#     return columns
 
-@app.callback(
+@app.callback([
     Output('datatable-interactivity', 'data'),
+    Output('datatable-interactivity', 'columns')],
     [Input('temp-data', 'children'),
     Input('date', 'date')])
 def display_climate_day_table(temp_data, date):
-    dr = df_all_temps[(df_all_temps.index.month == int(date[5:7])) & (df_all_temps.index.day == int(date[8:10]))]
+    dr = df_date_index[(df_date_index.index.month == int(date[5:7])) & (df_date_index.index.day == int(date[8:10]))]
+    # dr = df_all_temps[(df_all_temps['Date'][5:7] == date[5:7]) & (df_all_temps['Date'][8:10] == date[8:10])]
     dr = dr.reset_index()
+    # print(dr)
+    columns=[
+        {"name": i, "id": i,"selectable": True} for i in dr.columns
+    ]
     
     dr['Date'] = dr['Date'].dt.strftime('%Y-%m-%d')
 
-    return dr.to_dict('records')
+    return dr.to_dict('records'), columns
 
 @app.callback(Output('graph1', 'figure'),
              [Input('temp-data', 'children'),
@@ -390,12 +415,39 @@ def display_climate_day_table(temp_data, date):
 def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     previous_year = int(selected_year) - 1
     selected_year = selected_year
-    temps = df_all_temps
+    temps = pd.read_json(temp_data)
+    print(temps)
+    temps = temps.drop([0,1], axis=1)
+    print(temps)
+    temps.columns = ['date','TMAX','TMIN']
+    print(temps)
+    temps['date'] = pd.to_datetime(temps['date'])
+    temps = temps.set_index(['date'])
+    print(temps)
+    temps['dif'] = temps['TMAX'] - temps['TMIN']
+    print(temps)
+    
+    print(temps)
+    # df_all_temps = (temps,columns=['dow','sta','Date','TMAX','TMIN'])
+    # print(df_all_temps)
+    # df_table_temps = df_all_temps
+    # df_all_temps['Date'] = pd.to_datetime(df_all_temps['Date'])
+    # last_day = df_all_temps.iloc[-1, 2] + timedelta(days=1)
+    # ld = last_day.strftime("%Y-%m-%d")
+    # # df_all_temps = df_all_temps.set_index(['Date'])
+    # df_all_temps = df_all_temps.drop(['dow','sta'], axis=1)
+    # print(df_all_temps)
+    # df_date_index = df_all_temps.set_index(['date'])
+    # print(df_date_index.columns)
+    # df_ya_max = df_date_index.resample('Y').mean()
+    # df5 = df_ya_max[:-1]
 
-    temps[6] = temps.index.day_name()
-    temps[5] = temps[3] - temps[4]
+    # temps[6] = temps.index.day_name()
+    
+    
    
     temps_cy = temps[temps.index.year.isin([selected_year])]
+    # print(temps_cy)
     temps_py = temps[temps.index.year.isin([previous_year])]
     df_record_highs_ly = pd.read_json(rec_highs)
     df_record_highs_ly = df_record_highs_ly.set_index(1)
@@ -411,6 +463,7 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     temps_cy.loc[:,'rh'] = df_rh_cy[0].values
     temps_cy.loc[:,'nh'] = df_norms_cy[3].values
     temps_cy.loc[:,'nl'] = df_norms_cy[4].values
+    print(temps_cy)
    
     if period == 'spring':
         temps = temps_cy[temps_cy.index.month.isin([3,4,5])]
@@ -495,9 +548,9 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
       
     trace = [
             go.Bar(
-                y = temps[5],
+                y = temps['dif'],
                 x = bar_x,
-                base = temps[4],
+                base = temps['TMIN'],
                 name='Temp Range',
                 marker = mkr_color,
                 hovertemplate = 'Temp Range: %{y} - %{base}<extra></extra><br>'

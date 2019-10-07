@@ -115,26 +115,20 @@ app.layout = html.Div(
                     ),
                 ),
                 html.Div([
-                    html.Div([
-                        html.H6('Record High', className='three columns'),
-                        html.H6(id='dmtv')
-                    ],
-                    className='round1'
-                    ),
+                    html.Div(id='daily-max-t'),
                     html.Div(
                     id='daily-min-t',
                     className='two columns',
                     ),
                 ],
-                    className='container'
                 ),
                 
-                html.Div(
-                    html.H4(
-                    'Minimum Temperature',
-                    style={'text-align': 'center'}
-                    ),
-                ),  
+                # html.Div(
+                #     html.H4(
+                #     'Minimum Temperature',
+                #     style={'text-align': 'center'}
+                #     ),
+                # ),  
             ],
                 className='seven columns'
             ),     
@@ -167,15 +161,25 @@ app.layout = html.Div(
 )
 
 @app.callback(
-            [Output('daily-max-t', 'children'),
-            Output('dmtv', 'children')],
+            Output('daily-max-t', 'children'),
             [Input('product', 'value'),
             Input('daily-max-temp', 'children')])
 def all_temps_cleaner(product, dmt):
     daily_max_t = dmt
     print(daily_max_t)
     
-    return 'Record Max', 'number'
+    return html.Div([
+        html.Div([
+            html.H6('Record High', style={'text-align':'center'}),
+            # html.Br(),
+            html.H6('{}'.format(daily_max_t), style={'text-align':'center'})
+        ],
+            className='round1'
+        ),
+    ],
+        className='three columns'
+    ),
+
 
 @app.callback(Output('title-date-range', 'children'),
             [Input('product', 'value'),

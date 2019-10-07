@@ -364,8 +364,6 @@ def display_climate_stuff(value):
         sort_action="native",
         sort_mode="multi",
         column_selectable="single",
-        row_selectable="multi",
-        row_deletable=True,
         selected_columns=[],
         selected_rows=[],
         # page_action="native",
@@ -382,12 +380,9 @@ def update_graphs(rows, derived_virtual_selected_rows, value):
     if value == 'climate-for-day':
         if derived_virtual_selected_rows is None:
             derived_virtual_selected_rows = []
-        # print(rows)
-        # df_all_temps = pd.DataFrame(all_temps,columns=['dow','sta','Date','TMAX','TMIN'])
 
         dff = pd.DataFrame(rows)
-        # df_all_temps = df_all_temps.drop(['dow','sta'], axis=1)
-        # print(dff)
+       
         colors = ['#7FDBFF' if i in derived_virtual_selected_rows else '#0074D9'
                 for i in range(len(dff))]
         
@@ -473,26 +468,7 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     temps = temps.set_index(['date'])
     # print(temps)
     temps['dif'] = temps['TMAX'] - temps['TMIN']
-    # print(temps)
-    
-    # print(temps)
-    # df_all_temps = (temps,columns=['dow','sta','Date','TMAX','TMIN'])
-    # print(df_all_temps)
-    # df_table_temps = df_all_temps
-    # df_all_temps['Date'] = pd.to_datetime(df_all_temps['Date'])
-    # last_day = df_all_temps.iloc[-1, 2] + timedelta(days=1)
-    # ld = last_day.strftime("%Y-%m-%d")
-    # # df_all_temps = df_all_temps.set_index(['Date'])
-    # df_all_temps = df_all_temps.drop(['dow','sta'], axis=1)
-    # print(df_all_temps)
-    # df_date_index = df_all_temps.set_index(['date'])
-    # print(df_date_index.columns)
-    # df_ya_max = df_date_index.resample('Y').mean()
-    # df5 = df_ya_max[:-1]
-
-    # temps[6] = temps.index.day_name()
-    
-    
+   
    
     temps_cy = temps[temps.index.year.isin([selected_year])]
     temps_py = temps[temps.index.year.isin([previous_year])]

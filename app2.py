@@ -19,7 +19,6 @@ current_year = datetime.now().year
 today = time.strftime("%Y-%m-%d")
 startyr = 1950
 year_count = current_year-startyr
-print(year_count)
 
 df_norms = pd.DataFrame(norm_records)
 
@@ -27,34 +26,9 @@ df_rec_lows = pd.DataFrame(rec_lows)
 
 df_rec_highs = pd.DataFrame(rec_highs)
 
-# df_all_temps = pd.DataFrame(all_temps)
 
 df_all_temps = pd.DataFrame(all_temps,columns=['dow','sta','Date','TMAX','TMIN'])
-# print(all_temps)
-# df_table_temps = df_all_temps
-# df_all_temps['Date'] = pd.to_datetime(df_all_temps['Date'])
-# last_day = df_all_temps.iloc[-1, 2] + timedelta(days=1)
-# ld = last_day.strftime("%Y-%m-%d")
-# df_all_temps = df_all_temps.set_index(['Date'])
-# df_all_temps = df_all_temps.drop(['dow','sta'], axis=1)
-# print(df_all_temps)
-# df_date_index = df_all_temps.set_index(['Date'])
-# print(df_date_index.columns)
-# df_ya_max = df_date_index.resample('Y').mean()
-# df5 = df_ya_max[:-1]
-# print(df5)
 
-# trend line equations for all temp graphs
-# def all_max_temp_fit():
-#     xi = arange(0,year_count)
-#     slope, intercept, r_value, p_value, std_err = stats.linregress(xi,df5['TMAX'])
-#     return (slope*xi+intercept)
-
-# def all_min_temp_fit():
-#     df5 = df_ya_max[:-1]
-#     xi = arange(0,year_count)
-#     slope, intercept, r_value, p_value, std_err = stats.linregress(xi,df5['TMIN'])
-#     return (slope*xi+intercept)
 
 
 
@@ -72,7 +46,6 @@ app.layout = html.Div(
         html.Div([
             html.H4(
                 id='title-date-range',
-                # '1950-01-01 to {}'.format(ld),
                 className='twelve columns',
                 style={'text-align': 'center'}
             ),

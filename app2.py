@@ -116,20 +116,20 @@ app.layout = html.Div(
                 ),
                 html.Div([
                     html.Div(id='daily-max-t'),
-                    # html.Div(
-                    # id='daily-min-t',
-                    # className='two columns',
-                    # ),
                 ],
                     className='twelve columns'
                 ),
-                
-                # html.Div(
-                #     html.H4(
-                #     'Minimum Temperature',
-                #     style={'text-align': 'center'}
-                #     ),
-                # ),  
+                html.Div(
+                    html.H4(
+                    'Minimum Temperature',
+                    style={'text-align': 'center'}
+                    ),
+                ),
+                html.Div([
+                    html.Div(id='daily-min-t'),
+                ],
+                    className='twelve columns'
+                ), 
             ],
                 className='seven columns'
             ),     
@@ -146,10 +146,14 @@ app.layout = html.Div(
         html.Div(id='df5', style={'display': 'none'}),
         html.Div(id='max-trend', style={'display': 'none'}),
         html.Div(id='min-trend', style={'display': 'none'}),
-        html.Div(id='daily-max-temp', style={'display': 'none'}),
+        html.Div(id='daily-max-max', style={'display': 'none'}),
         html.Div(id='avg-of-dly-highs', style={'display': 'none'}),
-        html.Div(id='daily-high-min', style={'display': 'none'}),
+        html.Div(id='daily-min-max', style={'display': 'none'}),
+        html.Div(id='daily-min-min', style={'display': 'none'}),
+        html.Div(id='avg-of-dly-lows', style={'display': 'none'}),
+        html.Div(id='daily-max-min', style={'display': 'none'}),
     ],
+   
     # style={
     #     'width': '85%',
     #     'max-width': '1200',
@@ -162,19 +166,17 @@ app.layout = html.Div(
     #     'padding-bottom': '20',
     # },
 )
-
+  
 @app.callback(
             Output('daily-max-t', 'children'),
             [Input('product', 'value'),
-            Input('daily-max-temp', 'children'),
+            Input('daily-max-max', 'children'),
             Input('avg-of-dly-highs', 'children'),
-            Input('daily-high-min', 'children')])
-def all_temps_cleaner(product, dmaxt, admaxh, dmaxl):
+            Input('daily-min-max', 'children')])
+def all_temps_cleaner(product, dmaxt, admaxh, dminmax):
     daily_max_t = dmaxt
     admaxh = admaxh
-    dmaxl = dmaxl
-    print(daily_max_t)
-    
+    dmaxl = dminmax
     return html.Div([
         html.Div([
             html.Div([
@@ -192,7 +194,7 @@ def all_temps_cleaner(product, dmaxt, admaxh, dmaxl):
                 ),
                 html.Div([
                     html.H6('Minimum', style={'text-align':'center', 'color': 'red'}),
-                    html.H6('{:.0f}'.format(dmaxl), style={'text-align':'center'})
+                    html.H6('{}'.format(dmaxl), style={'text-align':'center'})
                 ],
                     className='round1 four columns'
                 ),
@@ -202,10 +204,47 @@ def all_temps_cleaner(product, dmaxt, admaxh, dmaxl):
         ],
             className='pretty_container'
         ),
-            
-    ],
-        # className='twelve columns'
-    ),
+    ])
+
+@app.callback(
+            Output('daily-min-t', 'children'),
+            [Input('product', 'value'),
+            Input('daily-min-min', 'children'),
+            Input('avg-of-dly-lows', 'children'),
+            Input('daily-max-min', 'children')])
+def all_temps_cleaner(product, dmint, adminh, dminl):
+    daily_min_t = dmint
+    adminh = adminh
+    dmaxl = dminl
+    return html.Div([
+
+        html.Div([
+            html.Div([
+                html.Div([
+                    html.H6('Minimum', style={'text-align':'center', 'color': 'blue'}),
+                    html.H6('{}'.format(daily_min_t), style={'text-align':'center'})
+                ],
+                    className='round1 four columns'
+                ),
+                html.Div([
+                    html.H6('Average', style={'text-align':'center', 'color': 'blue'}),
+                    html.H6('{:.0f}'.format(adminh), style={'text-align':'center'})
+                ],
+                    className='round1 four columns'
+                ),
+                html.Div([
+                    html.H6('Maximum', style={'text-align':'center', 'color': 'blue'}),
+                    html.H6('{}'.format(dmaxl), style={'text-align':'center'})
+                ],
+                    className='round1 four columns'
+                ),
+            ],
+                className='row'
+            ),
+        ],
+            className='pretty_container'
+        ),     
+    ]),
 
 
 @app.callback(Output('title-date-range', 'children'),
@@ -493,9 +532,12 @@ def update_graphs(rows, derived_virtual_selected_rows, value):
 @app.callback([
     Output('datatable-interactivity', 'data'),
     Output('datatable-interactivity', 'columns'),
-    Output('daily-max-temp', 'children'),
+    Output('daily-max-max', 'children'),
     Output('avg-of-dly-highs', 'children'),
-    Output('daily-high-min', 'children')],
+    Output('daily-min-max', 'children'),
+    Output('daily-min-min', 'children'),
+    Output('avg-of-dly-lows', 'children'),
+    Output('daily-max-min', 'children')],
     [Input('all-data', 'children'),
     Input('date', 'date')])
 def display_climate_day_table(all_data, date):
@@ -512,12 +554,15 @@ def display_climate_day_table(all_data, date):
     ]
     
     dr['Date'] = dr['Date'].dt.strftime('%Y-%m-%d')
-    daily_max_t = dr['TMAX'].max()
+    daily_max_max = dr['TMAX'].max()
     avg_of_dly_highs = dr['TMAX'].mean()
-    daily_record_high_min = dr['TMAX'].min()
-    print(avg_of_dly_highs)
+    daily_min_max = dr['TMAX'].min()
+    daily_min_min = dr['TMIN'].min()
+    avg_of_dly_lows = dr['TMIN'].mean()
+    daily_max_min = dr['TMIN'].max()
+    print(daily_min_max)
 
-    return dr.to_dict('records'), columns, daily_max_t, avg_of_dly_highs, daily_record_high_min
+    return dr.to_dict('records'), columns, daily_max_max, avg_of_dly_highs, daily_min_max, daily_min_min, avg_of_dly_lows, daily_max_min 
 
 @app.callback(Output('graph1', 'figure'),
              [Input('temp-data', 'children'),

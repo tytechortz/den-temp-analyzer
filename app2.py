@@ -344,6 +344,16 @@ def display_climate_stuff(value):
             {'if': {'column_id': 'TMIN'},
             'width':'140px'},
         ],
+        style_data_conditional=[
+            {
+            'if': {'row_index': 'odd'},
+            'backgroundColor': 'rgb(248, 248, 248)'
+            },
+        ],
+        style_header={
+        'backgroundColor': 'rgb(230, 230, 230)',
+        'fontWeight': 'bold'
+        },
         # editable=True,
         # filter_action="native",
         sort_action="native",

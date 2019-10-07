@@ -100,18 +100,13 @@ app.layout = html.Div(
             className='row'
         ),
         html.Div([
-            # html.Div([
-            #     html.Div(
-            #         id='datatable-interactivity-container'
-            #     ),
-            # ],
-            #      className='eight columns'
-            # ),
             html.Div([
                 html.Div(
                     id='climate-day-table'
                 ),
-            ])     
+            ],
+                className='five columns'
+            ),     
         ],
             className='row'
         ),
@@ -138,6 +133,16 @@ app.layout = html.Div(
     #     'padding-bottom': '20',
     # },
 )
+
+@app.callback(Output('daily-max-temp', 'children'),
+            [Input('product', 'value'),
+            Input('all-data', 'children')])
+def all_temps_cleaner(product, temps):
+    title_temps = pd.read_json(temps)
+    title_temps['Date']=title_temps['Date'].dt.strftime("%Y-%m-%d")
+    last_day = title_temps.iloc[-1, 0] 
+    
+    return 'Maximum Temperature'
 
 @app.callback(Output('title-date-range', 'children'),
             [Input('product', 'value'),
@@ -338,11 +343,11 @@ def display_climate_stuff(value):
         fixed_rows={'headers': True, 'data': 0},
         style_cell_conditional=[
             {'if': {'column_id': 'Date'},
-            'width':'140px'},
+            'width':'100px'},
             {'if': {'column_id': 'TMAX'},
-            'width':'140px'},
+            'width':'100px'},
             {'if': {'column_id': 'TMIN'},
-            'width':'140px'},
+            'width':'100px'},
         ],
         style_data_conditional=[
             {

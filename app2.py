@@ -109,7 +109,7 @@ app.layout = html.Div(
             # ),
             html.Div([
                 html.Div(
-                    id='climate-day-stuff'
+                    id='climate-day-table'
                 ),
             ])     
         ],
@@ -328,7 +328,7 @@ def display_graph(value):
     #     return dcc.Graph(id='TMAX'), dcc.Graph(id='TMIN')
 
 @app.callback(
-    Output('climate-day-stuff', 'children'),
+    Output('climate-day-table', 'children'),
     [Input('product', 'value')])
 def display_climate_stuff(value):
     if value == 'climate-for-day':

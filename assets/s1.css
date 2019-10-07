@@ -72,7 +72,7 @@
   .one-half.column                { width: 48%; }
 
   /* Offsets */
-  .offset-by-one.column,
+  /* .offset-by-one.column,
   .offset-by-one.columns          { margin-left: 8.66666666667%; }
   .offset-by-two.column,
   .offset-by-two.columns          { margin-left: 17.3333333333%; }
@@ -103,7 +103,7 @@
   .offset-by-one-half.column,
   .offset-by-one-half.columns     { margin-left: 52%; }
 
-}
+} */
 
 
 /* Base Styles
@@ -117,14 +117,14 @@ body {
   font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
   line-height: 1.6;
   font-weight: 400;
-  font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   color: rgb(50, 50, 50);
-  background-color: #F2F2F2;
+  background-color: rgb(160, 192, 229);
   margin: 5%;
 }
 .pretty_container {
   border-radius: 5px;
-  background-color: #F9F9F9;
+  background-color: rgb(83, 134, 201);
   margin: 10px;
   padding: 15px;
   position: relative;
@@ -417,7 +417,8 @@ li {
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 th,
 td {
-  padding: 12px 15px;
+  padding: 0px 0px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   text-align: left;
   border-bottom: 1px solid #E1E1E1; }
 th:first-child,

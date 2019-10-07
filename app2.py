@@ -108,10 +108,18 @@ app.layout = html.Div(
                 className='five columns'
             ),
             html.Div([
-                html.H4(
+                html.Div(
+                    html.H4(
                     'Maximum Temperature',
                     style={'text-align': 'center'}
+                    ),
                 ),
+                html.Div(
+                    html.H4(
+                    'Minimum Temperature',
+                    style={'text-align': 'center'}
+                    ),
+                ),  
             ],
                 className='seven columns'
             ),     

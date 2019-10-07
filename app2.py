@@ -115,16 +115,18 @@ app.layout = html.Div(
                     ),
                 ),
                 html.Div([
-                    html.Div(
-                    id='daily-max-t',
-                    className='two columns',
+                    html.Div([
+                        html.H6('Record High', className='three columns'),
+                        html.H6(id='dmtv')
+                    ],
+                    className='round1'
                     ),
                     html.Div(
                     id='daily-min-t',
                     className='two columns',
                     ),
                 ],
-                    className='row'
+                    className='container'
                 ),
                 
                 html.Div(
@@ -164,14 +166,16 @@ app.layout = html.Div(
     # },
 )
 
-@app.callback(Output('daily-max-t', 'children'),
+@app.callback(
+            [Output('daily-max-t', 'children'),
+            Output('dmtv', 'children')],
             [Input('product', 'value'),
             Input('daily-max-temp', 'children')])
 def all_temps_cleaner(product, dmt):
     daily_max_t = dmt
     print(daily_max_t)
     
-    return 'Maximum Temperature: {}'.format(daily_max_t)
+    return 'Record Max', 'number'
 
 @app.callback(Output('title-date-range', 'children'),
             [Input('product', 'value'),

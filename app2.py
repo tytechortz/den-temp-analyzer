@@ -116,11 +116,12 @@ app.layout = html.Div(
                 ),
                 html.Div([
                     html.Div(id='daily-max-t'),
-                    html.Div(
-                    id='daily-min-t',
-                    className='two columns',
-                    ),
+                    # html.Div(
+                    # id='daily-min-t',
+                    # className='two columns',
+                    # ),
                 ],
+                    className='twelve columns'
                 ),
                 
                 # html.Div(
@@ -146,6 +147,7 @@ app.layout = html.Div(
         html.Div(id='max-trend', style={'display': 'none'}),
         html.Div(id='min-trend', style={'display': 'none'}),
         html.Div(id='daily-max-temp', style={'display': 'none'}),
+        html.Div(id='avg-of-dly-highs', style={'display': 'none'}),
     ],
     # style={
     #     'width': '85%',
@@ -163,21 +165,37 @@ app.layout = html.Div(
 @app.callback(
             Output('daily-max-t', 'children'),
             [Input('product', 'value'),
-            Input('daily-max-temp', 'children')])
-def all_temps_cleaner(product, dmt):
+            Input('daily-max-temp', 'children'),
+            Input('avg-of-dly-highs', 'children')])
+def all_temps_cleaner(product, dmt, admh):
     daily_max_t = dmt
+    admh = admh
     print(daily_max_t)
     
     return html.Div([
         html.Div([
-            html.H6('Record High', style={'text-align':'center'}),
-            # html.Br(),
-            html.H6('{}'.format(daily_max_t), style={'text-align':'center'})
+            html.Div([
+                html.Div([
+                    html.H6('Record High', style={'text-align':'center', 'color': 'red'}),
+                    html.H6('{}'.format(daily_max_t), style={'text-align':'center'})
+                ],
+                    className='round1 six columns'
+                ),
+                html.Div([
+                    html.H6('Average', style={'text-align':'center', 'color': 'red'}),
+                    html.H6('{:.0f}'.format(admh), style={'text-align':'center'})
+                ],
+                    className='round1 six columns'
+                ),
+            ],
+                className='row'
+            ),
         ],
-            className='round1'
+            className='pretty_container'
         ),
+            
     ],
-        className='three columns'
+        # className='twelve columns'
     ),
 
 
@@ -466,7 +484,8 @@ def update_graphs(rows, derived_virtual_selected_rows, value):
 @app.callback([
     Output('datatable-interactivity', 'data'),
     Output('datatable-interactivity', 'columns'),
-    Output('daily-max-temp', 'children')],
+    Output('daily-max-temp', 'children'),
+    Output('avg-of-dly-highs', 'children')],
     [Input('all-data', 'children'),
     Input('date', 'date')])
 def display_climate_day_table(all_data, date):
@@ -484,9 +503,10 @@ def display_climate_day_table(all_data, date):
     
     dr['Date'] = dr['Date'].dt.strftime('%Y-%m-%d')
     daily_max_t = dr['TMAX'].max()
-    print(daily_max_t)
+    avg_of_dly_highs = dr['TMAX'].mean()
+    print(avg_of_dly_highs)
 
-    return dr.to_dict('records'), columns, daily_max_t
+    return dr.to_dict('records'), columns, daily_max_t, avg_of_dly_highs
 
 @app.callback(Output('graph1', 'figure'),
              [Input('temp-data', 'children'),

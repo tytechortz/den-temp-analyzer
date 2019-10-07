@@ -131,6 +131,13 @@ body {
   box-shadow: 2px 2px 2px lightgrey;
 }
 
+.round1 {
+  padding: 20px;
+  border: 2px solid #dadada;
+  border-radius : 5px;
+  background-color: rgb(249,249,249);
+       }
+
 .bare_container {
   margin: 0 0 0 0;
   padding: 0 0 0 0;

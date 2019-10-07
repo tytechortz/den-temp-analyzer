@@ -114,6 +114,19 @@ app.layout = html.Div(
                     style={'text-align': 'center'}
                     ),
                 ),
+                html.Div([
+                    html.Div(
+                    id='daily-max-t',
+                    className='two columns',
+                    ),
+                    html.Div(
+                    id='daily-min-t',
+                    className='two columns',
+                    ),
+                ],
+                    className='row'
+                ),
+                
                 html.Div(
                     html.H4(
                     'Minimum Temperature',
@@ -136,6 +149,7 @@ app.layout = html.Div(
         html.Div(id='df5', style={'display': 'none'}),
         html.Div(id='max-trend', style={'display': 'none'}),
         html.Div(id='min-trend', style={'display': 'none'}),
+        html.Div(id='daily-max-temp', style={'display': 'none'}),
     ],
     # style={
     #     'width': '85%',
@@ -150,15 +164,14 @@ app.layout = html.Div(
     # },
 )
 
-@app.callback(Output('daily-max-temp', 'children'),
+@app.callback(Output('daily-max-t', 'children'),
             [Input('product', 'value'),
-            Input('all-data', 'children')])
-def all_temps_cleaner(product, temps):
-    title_temps = pd.read_json(temps)
-    title_temps['Date']=title_temps['Date'].dt.strftime("%Y-%m-%d")
-    last_day = title_temps.iloc[-1, 0] 
+            Input('daily-max-temp', 'children')])
+def all_temps_cleaner(product, dmt):
+    daily_max_t = dmt
+    print(daily_max_t)
     
-    return 'Maximum Temperature'
+    return 'Maximum Temperature: {}'.format(daily_max_t)
 
 @app.callback(Output('title-date-range', 'children'),
             [Input('product', 'value'),
@@ -444,7 +457,8 @@ def update_graphs(rows, derived_virtual_selected_rows, value):
 
 @app.callback([
     Output('datatable-interactivity', 'data'),
-    Output('datatable-interactivity', 'columns')],
+    Output('datatable-interactivity', 'columns'),
+    Output('daily-max-temp', 'children')],
     [Input('all-data', 'children'),
     Input('date', 'date')])
 def display_climate_day_table(all_data, date):
@@ -461,8 +475,10 @@ def display_climate_day_table(all_data, date):
     ]
     
     dr['Date'] = dr['Date'].dt.strftime('%Y-%m-%d')
+    daily_max_t = dr['TMAX'].max()
+    print(daily_max_t)
 
-    return dr.to_dict('records'), columns
+    return dr.to_dict('records'), columns, daily_max_t
 
 @app.callback(Output('graph1', 'figure'),
              [Input('temp-data', 'children'),

@@ -108,6 +108,10 @@ app.layout = html.Div(
             html.Div([
                 html.Div([
                     html.Div(id='daily-max-t'),
+                    # html.Div(
+                    # id='daily-min-t',
+                    # className='two columns',
+                    # ),
                 ],
                     className='twelve columns'
                 ),
@@ -134,12 +138,8 @@ app.layout = html.Div(
         # html.Div(id='min-trend', style={'display': 'none'}),
         html.Div(id='daily-max-max', style={'display': 'none'}),
         html.Div(id='avg-of-dly-highs', style={'display': 'none'}),
-        html.Div(id='daily-min-max', style={'display': 'none'}),
-        html.Div(id='daily-min-min', style={'display': 'none'}),
-        html.Div(id='avg-of-dly-lows', style={'display': 'none'}),
-        html.Div(id='daily-max-min', style={'display': 'none'}),
+        html.Div(id='daily-high-min', style={'display': 'none'}),
     ],
-   
     # style={
     #     'width': '85%',
     #     'max-width': '1200',
@@ -225,7 +225,7 @@ app.layout = html.Div(
 @app.callback(
             Output('daily-max-t', 'children'),
             [Input('product', 'value'),
-            Input('daily-max-max', 'children'),
+            Input('daily-max-temp', 'children'),
             Input('avg-of-dly-highs', 'children'),
             Input('daily-min-max', 'children')])
 def max_temps_stats(product, dmaxt, admaxh, dminmax):
@@ -597,12 +597,9 @@ def update_graphs(rows, derived_virtual_selected_rows, value):
 @app.callback([
     Output('datatable-interactivity', 'data'),
     Output('datatable-interactivity', 'columns'),
-    Output('daily-max-max', 'children'),
+    Output('daily-max-temp', 'children'),
     Output('avg-of-dly-highs', 'children'),
-    Output('daily-min-max', 'children'),
-    Output('daily-min-min', 'children'),
-    Output('avg-of-dly-lows', 'children'),
-    Output('daily-max-min', 'children')],
+    Output('daily-high-min', 'children')],
     [Input('all-data', 'children'),
     Input('date', 'value')])
 def display_climate_day_table(all_data, date):
@@ -617,14 +614,14 @@ def display_climate_day_table(all_data, date):
     ]
     
     dr['Date'] = dr['Date'].dt.strftime('%Y-%m-%d')
-    daily_max_max = dr['TMAX'].max()
+    daily_max_t = dr['TMAX'].max()
     avg_of_dly_highs = dr['TMAX'].mean()
     daily_min_max = dr['TMAX'].min()
     daily_min_min = dr['TMIN'].min()
     avg_of_dly_lows = dr['TMIN'].mean()
     daily_max_min = dr['TMIN'].max()
 
-    return dr.to_dict('records'), columns, daily_max_max, avg_of_dly_highs, daily_min_max, daily_min_min, avg_of_dly_lows, daily_max_min 
+    return dr.to_dict('records'), columns, daily_max_t, avg_of_dly_highs, daily_record_high_min
 
 @app.callback(Output('graph1', 'figure'),
              [Input('temp-data', 'children'),

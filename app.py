@@ -16,6 +16,7 @@ import dash_table
 import psycopg2
 import operator
 from dash.exceptions import PreventUpdate
+from conect import norm_records, rec_lows, rec_highs, all_temps
 
 current_year = datetime.now().year
 today = time.strftime("%Y-%m-%d")

@@ -31,8 +31,6 @@ df_rec_highs = pd.DataFrame(rec_highs)
 df_all_temps = pd.DataFrame(all_temps,columns=['dow','sta','Date','TMAX','TMIN'])
 
 
-
-
 app.layout = html.Div(
     [
         html.Div([
@@ -62,8 +60,8 @@ app.layout = html.Div(
                     options=[
                         {'label':'Temperature graphs', 'value':'temp-graph'},
                         {'label':'Climatology for a day', 'value':'climate-for-day'},
-                        {'label':'Calendar day summaries', 'value':'cal-day-summary'},
-                        {'label':'5 Year Moving Avgs', 'value':'fyma'},
+                        # {'label':'5 Year Moving Avgs', 'value':'fyma'},
+                        # {'label':'Calendar day summaries', 'value':'cal-day-summary'},
                     ],
                     value='temp-graph',
                     labelStyle={'display': 'block'},
@@ -108,22 +106,10 @@ app.layout = html.Div(
                 className='five columns'
             ),
             html.Div([
-                html.Div(
-                    html.H4(
-                    'Maximum Temperature',
-                    style={'text-align': 'center'}
-                    ),
-                ),
                 html.Div([
                     html.Div(id='daily-max-t'),
                 ],
                     className='twelve columns'
-                ),
-                html.Div(
-                    html.H4(
-                    'Minimum Temperature',
-                    style={'text-align': 'center'}
-                    ),
                 ),
                 html.Div([
                     html.Div(id='daily-min-t'),
@@ -143,9 +129,9 @@ app.layout = html.Div(
         html.Div(id='rec-lows', style={'display': 'none'}),
         html.Div(id='norms', style={'display': 'none'}),
         html.Div(id='all-data', style={'display': 'none'}),
-        html.Div(id='df5', style={'display': 'none'}),
-        html.Div(id='max-trend', style={'display': 'none'}),
-        html.Div(id='min-trend', style={'display': 'none'}),
+        # html.Div(id='df5', style={'display': 'none'}),
+        # html.Div(id='max-trend', style={'display': 'none'}),
+        # html.Div(id='min-trend', style={'display': 'none'}),
         html.Div(id='daily-max-max', style={'display': 'none'}),
         html.Div(id='avg-of-dly-highs', style={'display': 'none'}),
         html.Div(id='daily-min-max', style={'display': 'none'}),
@@ -166,45 +152,118 @@ app.layout = html.Div(
     #     'padding-bottom': '20',
     # },
 )
+
+
+# @app.callback(Output('fyma-graph', 'figure'),
+#              [Input('temp-param', 'value'),
+#              Input('year', 'value'),
+#              Input('max-trend', 'children'),
+#              Input('min-trend', 'children'),
+#              Input('df5', 'children'),
+#              Input('all-data', 'children')])
+# def update_figure1(selected_param, selected_year, max_trend, min_trend, df5, all_data,):
+#     print(all_data)
+#     fyma_temps = pd.read_json(all_data)
+#     fyma_temps['Date']=fyma_temps['Date'].dt.strftime("%Y-%m-%d") 
+#     fyma_temps.set_index(['Date'], inplace=True)
+
+#     df_5 = pd.read_json(df5)
+
+#     all_max_temp_fit = pd.DataFrame(max_trend)
+#     all_max_temp_fit.index = df_5.index
+#     all_max_temp_fit.index = all_max_temp_fit.index.strftime("%Y-%m-%d")
+   
+#     all_min_temp_fit = pd.DataFrame(min_trend)
+#     all_min_temp_fit.index = df_5.index
+#     all_min_temp_fit.index = all_min_temp_fit.index.strftime("%Y-%m-%d")
+   
+#     all_max_rolling = fyma_temps['TMAX'].dropna().rolling(window=1825)
+#     all_max_rolling_mean = all_max_rolling.mean()
+
+#     all_min_rolling = fyma_temps['TMIN'].dropna().rolling(window=1825)
+#     all_min_rolling_mean = all_min_rolling.mean()
   
+
+#     if selected_param == 'Tmax':
+#         trace = [
+#             go.Scatter(
+#                 y = all_max_rolling_mean,
+#                 x = fyma_temps.index,
+#                 name='Max Temp'
+#             ),
+#             go.Scatter(
+#                 y = all_max_temp_fit[0],
+#                 x = all_max_temp_fit.index,
+#                 name = 'trend',
+#                 line = {'color':'red'}
+#             ),
+#         ]
+#     elif selected_param == 'Tmin':
+#         trace = [
+#             go.Scatter(
+#                 y = all_min_rolling_mean,
+#                 x = fyma_temps.index,
+#                 name='Min Temp'
+#             ),
+#             go.Scatter(
+#                 y = all_min_temp_fit[0],
+#                 x = all_min_temp_fit.index,
+#                 name = 'trend',
+#                 line = {'color':'red'}
+#             ),
+            
+#     ]
+#     layout = go.Layout(
+#         xaxis = {'rangeslider': {'visible':True},},
+#         yaxis = {"title": 'Temperature F'},
+#         title ='5 Year Rolling Mean',
+#         plot_bgcolor = 'lightgray',
+#         height = 500,
+#     )
+#     return {'data': trace, 'layout': layout}
+
 @app.callback(
             Output('daily-max-t', 'children'),
             [Input('product', 'value'),
             Input('daily-max-max', 'children'),
             Input('avg-of-dly-highs', 'children'),
             Input('daily-min-max', 'children')])
-def all_temps_cleaner(product, dmaxt, admaxh, dminmax):
+def max_temps_stats(product, dmaxt, admaxh, dminmax):
     daily_max_t = dmaxt
     admaxh = admaxh
     dmaxl = dminmax
-    return html.Div([
-        html.Div([
+    if product == 'climate-for-day':
+        return html.Div([
+            html.Div([
+                html.H4('Maximum Temperature',style={'text-align': 'center', 'color': 'red'}),
+            ]),
             html.Div([
                 html.Div([
-                    html.H6('Maximum', style={'text-align':'center', 'color': 'red'}),
-                    html.H6('{}'.format(daily_max_t), style={'text-align':'center'})
+                    html.Div([
+                        html.H6('Maximum', style={'text-align':'center', 'color': 'red'}),
+                        html.H6('{}'.format(daily_max_t), style={'text-align':'center'})
+                    ],
+                        className='round1 four columns'
+                    ),
+                    html.Div([
+                        html.H6('Average', style={'text-align':'center', 'color': 'red'}),
+                        html.H6('{:.0f}'.format(admaxh), style={'text-align':'center'})
+                    ],
+                        className='round1 four columns'
+                    ),
+                    html.Div([
+                        html.H6('Minimum', style={'text-align':'center', 'color': 'red'}),
+                        html.H6('{}'.format(dmaxl), style={'text-align':'center'})
+                    ],
+                        className='round1 four columns'
+                    ),
                 ],
-                    className='round1 four columns'
-                ),
-                html.Div([
-                    html.H6('Average', style={'text-align':'center', 'color': 'red'}),
-                    html.H6('{:.0f}'.format(admaxh), style={'text-align':'center'})
-                ],
-                    className='round1 four columns'
-                ),
-                html.Div([
-                    html.H6('Minimum', style={'text-align':'center', 'color': 'red'}),
-                    html.H6('{}'.format(dmaxl), style={'text-align':'center'})
-                ],
-                    className='round1 four columns'
+                    className='row'
                 ),
             ],
-                className='row'
-            ),
-        ],
-            className='pretty_container'
-        ),
-    ])
+                className='pretty_container2'
+            ),       
+        ]),
 
 @app.callback(
             Output('daily-min-t', 'children'),
@@ -212,91 +271,98 @@ def all_temps_cleaner(product, dmaxt, admaxh, dminmax):
             Input('daily-min-min', 'children'),
             Input('avg-of-dly-lows', 'children'),
             Input('daily-max-min', 'children')])
-def all_temps_cleaner(product, dmint, adminh, dminl):
+def min_temps_stats(product, dmint, adminh, dminl):
     daily_min_t = dmint
     adminh = adminh
     dmaxl = dminl
-    return html.Div([
-
-        html.Div([
+    if product == 'climate-for-day':
+        return html.Div([
+            html.Div([
+                html.H4('Minimum Temperature',style={'text-align': 'center', 'color': 'blue'}),
+            ]),
             html.Div([
                 html.Div([
-                    html.H6('Minimum', style={'text-align':'center', 'color': 'blue'}),
-                    html.H6('{}'.format(daily_min_t), style={'text-align':'center'})
+                    html.Div([
+                        html.H6('Minimum', style={'text-align':'center', 'color': 'red'}),
+                        html.H6('{}'.format(daily_min_t), style={'text-align':'center'})
+                    ],
+                        className='round1 four columns'
+                    ),
+                    html.Div([
+                        html.H6('Average', style={'text-align':'center', 'color': 'red'}),
+                        html.H6('{:.0f}'.format(adminh), style={'text-align':'center'})
+                    ],
+                        className='round1 four columns'
+                    ),
+                    html.Div([
+                        html.H6('Maximum', style={'text-align':'center', 'color': 'red'}),
+                        html.H6('{}'.format(dminl), style={'text-align':'center'})
+                    ],
+                        className='round1 four columns'
+                    ),
                 ],
-                    className='round1 four columns'
-                ),
-                html.Div([
-                    html.H6('Average', style={'text-align':'center', 'color': 'blue'}),
-                    html.H6('{:.0f}'.format(adminh), style={'text-align':'center'})
-                ],
-                    className='round1 four columns'
-                ),
-                html.Div([
-                    html.H6('Maximum', style={'text-align':'center', 'color': 'blue'}),
-                    html.H6('{}'.format(dmaxl), style={'text-align':'center'})
-                ],
-                    className='round1 four columns'
+                    className='row'
                 ),
             ],
-                className='row'
-            ),
-        ],
-            className='pretty_container'
-        ),     
-    ]),
+                className='pretty_container'
+            ),       
+        ]),
 
 
 @app.callback(Output('title-date-range', 'children'),
             [Input('product', 'value'),
             Input('all-data', 'children')])
 def all_temps_cleaner(product, temps):
+    print(product)
     title_temps = pd.read_json(temps)
     title_temps['Date']=title_temps['Date'].dt.strftime("%Y-%m-%d")
     last_day = title_temps.iloc[-1, 0] 
     
     return '1950-01-01 through {}'.format(last_day)
 
-@app.callback(
-    Output('df5', 'children'),
-    [Input('all-data', 'children'),
-    Input('product', 'value')])
-def display_climate_day_table(all_data, product_value):
-    title_temps = pd.read_json(all_data)
-    title_temps['Date']=title_temps['Date'].dt.strftime("%Y-%m-%d")
-    df_date_index = df_all_temps.set_index(['Date'])
-    df_ya_max = df_date_index.resample('Y').mean()
-    df5 = df_ya_max[:-1]
-    df5 = df5.drop(['dow'], axis=1)
+# @app.callback(
+#     Output('df5', 'children'),
+#     [Input('all-data', 'children'),
+#     Input('product', 'value')])
+# def display_climate_day_table(all_data, product_value):
+#     title_temps = pd.read_json(all_data)
+#     title_temps['Date']=title_temps['Date'].dt.strftime("%Y-%m-%d")
+#     df_date_index = df_all_temps.set_index(['Date'])
+#     df_ya_max = df_date_index.resample('Y').mean()
+#     df5 = df_ya_max[:-1]
+#     df5 = df5.drop(['dow'], axis=1)
 
-    return df5.to_json(date_format='iso')
+#     return df5.to_json(date_format='iso')
 
-@app.callback(
-    Output('max-trend', 'children'),
-    [Input('df5', 'children'),
-    Input('product', 'value')])
-def all_max_trend(df_5, product_value):
-    df5 = pd.read_json(df_5)
-    xi = arange(0,year_count)
-    slope, intercept, r_value, p_value, std_err = stats.linregress(xi,df5['TMAX'])
-
-    return (slope*xi+intercept)
-
-@app.callback(
-    Output('min-trend', 'children'),
-    [Input('df5', 'children'),
-    Input('product', 'value')])
-def all_max_trend(df_5, product_value):
-    df5 = pd.read_json(df_5)
-    xi = arange(0,year_count)
-    slope, intercept, r_value, p_value, std_err = stats.linregress(xi,df5['TMIN'])
+# @app.callback(
+#     Output('max-trend', 'children'),
+#     [Input('df5', 'children'),
+#     Input('product', 'value')])
+# def all_max_trend(df_5, product_value):
     
-    return (slope*xi+intercept)
+#     df5 = pd.read_json(df_5)
+#     xi = arange(0,year_count)
+#     slope, intercept, r_value, p_value, std_err = stats.linregress(xi,df5['TMAX'])
+
+#     return (slope*xi+intercept)
+
+# @app.callback(
+#     Output('min-trend', 'children'),
+#     [Input('df5', 'children'),
+#     Input('product', 'value')])
+# def all_min_trend(df_5, product_value):
+    
+#     df5 = pd.read_json(df_5)
+#     xi = arange(0,year_count)
+#     slope, intercept, r_value, p_value, std_err = stats.linregress(xi,df5['TMIN'])
+    
+#     return (slope*xi+intercept)
 
 
 @app.callback(Output('all-data', 'children'),
             [Input('product', 'value')])
 def all_temps_cleaner(product):
+    # print(product)
     cleaned_all_temps = df_all_temps
     cleaned_all_temps.columns=['dow','sta','Date','TMAX','TMIN']
     cleaned_all_temps['Date'] = pd.to_datetime(cleaned_all_temps['Date'])
@@ -360,20 +426,20 @@ def norm_highs(selected_year):
         norms = df_norms.drop(df_norms.index[59])
     return norms.to_json()
 
-@app.callback(
-    Output('time-param', 'children'),
-    [Input('product', 'value')])
-def display_time_param(product_value):
-    if product_value == 'daily-data-month':
-        return html.Div('Date:')
-    elif product_value == 'temp-graph':
-        return html.Div([html.H3('Year:')])
+# @app.callback(
+#     Output('time-param', 'children'),
+#     [Input('product', 'value')])
+# def display_time_param(product_value):
+#     if product_value == 'daily-data-month':
+#         return html.Div('Date:')
+#     elif product_value == 'temp-graph':
+#         return html.Div([html.H3('Year:')])
 
 @app.callback(
     Output('year-picker', 'children'),
     [Input('product', 'value')])
 def display_year_selector(product_value):
-    if product_value == 'temp-graph' or 'fyma':
+    if product_value == 'temp-graph':
         return dcc.Input(
                     id = 'year',
                     type = 'number',
@@ -386,7 +452,6 @@ def display_year_selector(product_value):
 @app.callback(
     Output('period-picker', 'children'),
     [Input('product', 'value')])
-    # Input('year', 'value')])
 def display_period_selector(product_value):
     if product_value == 'temp-graph':
         return  dcc.RadioItems(
@@ -401,16 +466,16 @@ def display_period_selector(product_value):
                     value = 'annual',
                     labelStyle = {'display':'block'}
                 )
-    elif product_value == 'fyma':
-        return  dcc.RadioItems(
-                    id = 'temp-param',
-                    options = [
-                        {'label':'Max Temp', 'value':'Tmax'},
-                        {'label':'Min Temp', 'value':'Tmin'},
-                    ],
-                    value = 'Tmax',
-                    labelStyle = {'display':'block'}
-                )
+    # elif product_value == 'fyma':
+    #     return  dcc.RadioItems(
+    #                 id = 'temp-param',
+    #                 options = [
+    #                     {'label':'Max Temp', 'value':'Tmax'},
+    #                     {'label':'Min Temp', 'value':'Tmin'},
+    #                 ],
+    #                 value = 'Tmax',
+    #                 labelStyle = {'display':'block'}
+    #             )
 
 @app.callback(
     Output('date-picker', 'children'),
@@ -430,8 +495,8 @@ def display_date_selector(product_value):
 def display_graph(value):
     if value == 'temp-graph':
         return dcc.Graph(id='graph1')
-    elif value == 'fyma':
-        return dcc.Graph(id='fyma') 
+    # elif value == 'fyma':
+    #     return dcc.Graph(id='fyma-graph') 
     # elif  value == 'climate-for-day':
     #     return dcc.Graph(id='TMAX'), dcc.Graph(id='TMIN')
 
@@ -539,16 +604,14 @@ def update_graphs(rows, derived_virtual_selected_rows, value):
     Output('avg-of-dly-lows', 'children'),
     Output('daily-max-min', 'children')],
     [Input('all-data', 'children'),
-    Input('date', 'date')])
+    Input('date', 'value')])
 def display_climate_day_table(all_data, date):
     dr = pd.read_json(all_data)
     # dr['Date']=dr['Date'].dt.strftime("%Y-%m-%d") 
     dr.set_index(['Date'], inplace=True)
-    # print(dr)
     dr = dr[(dr.index.month == int(date[5:7])) & (dr.index.day == int(date[8:10]))]
     # dr = df_all_temps[(df_all_temps['Date'][5:7] == date[5:7]) & (df_all_temps['Date'][8:10] == date[8:10])]
     dr = dr.reset_index()
-    # print(dr)
     columns=[
         {"name": i, "id": i,"selectable": True} for i in dr.columns
     ]
@@ -560,7 +623,6 @@ def display_climate_day_table(all_data, date):
     daily_min_min = dr['TMIN'].min()
     avg_of_dly_lows = dr['TMIN'].mean()
     daily_max_min = dr['TMIN'].max()
-    print(daily_min_max)
 
     return dr.to_dict('records'), columns, daily_max_max, avg_of_dly_highs, daily_min_max, daily_min_min, avg_of_dly_lows, daily_max_min 
 
@@ -575,14 +637,10 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     previous_year = int(selected_year) - 1
     selected_year = selected_year
     temps = pd.read_json(temp_data)
-    # print(temps)
     temps = temps.drop([0,1], axis=1)
-    # print(temps)
     temps.columns = ['date','TMAX','TMIN']
-    # print(temps)
     temps['date'] = pd.to_datetime(temps['date'])
     temps = temps.set_index(['date'])
-    # print(temps)
     temps['dif'] = temps['TMAX'] - temps['TMIN']
    
    
@@ -602,7 +660,6 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     temps_cy.loc[:,'rh'] = df_rh_cy[0].values
     temps_cy.loc[:,'nh'] = df_norms_cy[3].values
     temps_cy.loc[:,'nl'] = df_norms_cy[4].values
-    # print(temps_cy)
    
     if period == 'spring':
         temps = temps_cy[temps_cy.index.month.isin([3,4,5])]
@@ -733,73 +790,22 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         )
     return {'data': trace, 'layout': layout}
 
-@app.callback(Output('fyma', 'figure'),
-             [Input('year', 'value'),
-             Input('temp-param', 'value'),
-             Input('all-data', 'children'),
-             Input('max-trend', 'children'),
-             Input('min-trend', 'children'),
-             Input('product', 'value'),
-             Input('df5', 'children')])
-def update_figure(selected_year, selected_param, all_data, max_trend, min_trend, product_value, df_5):
-   
-    fyma_temps = pd.read_json(all_data)
-    fyma_temps['Date']=fyma_temps['Date'].dt.strftime("%Y-%m-%d") 
-    fyma_temps.set_index(['Date'], inplace=True)
-    df_5 = pd.read_json(df_5)
-    all_max_temp_fit = pd.DataFrame(max_trend)
-   
-    all_max_temp_fit.index = df_5.index
-    all_max_temp_fit.index = all_max_temp_fit.index.strftime("%Y-%m-%d")
-   
-    all_min_temp_fit = pd.DataFrame(min_trend)
-    all_min_temp_fit.index = df_5.index
-    all_min_temp_fit.index = all_min_temp_fit.index.strftime("%Y-%m-%d")
-   
-    all_max_rolling = fyma_temps['TMAX'].dropna().rolling(window=1825)
-    all_max_rolling_mean = all_max_rolling.mean()
 
-    all_min_rolling = fyma_temps['TMIN'].dropna().rolling(window=1825)
-    all_min_rolling_mean = all_min_rolling.mean()
-  
+# @app.callback(Output('fyma', 'figure'),
+#             [Input('all-data', 'children'),
+#             Input('temp-param', 'value'),
+#             Input('df5', 'children')])
+# def update_fyma(all_data, selected_param, df5):
+#     fyma_temps = pd.read_json(all_data)
+#     fyma_temps['Date']=fyma_temps['Date'].dt.strftime("%Y-%m-%d") 
+#     fyma_temps.set_index(['Date'], inplace=True)
+#     # all_max_temp_fit = pd.DataFrame(max_trend)
+#     df_5 = pd.read_json(df_5)
+#     return print(selected_param)
+    
 
-    if selected_param == 'Tmax':
-        trace = [
-            go.Scatter(
-                y = all_max_rolling_mean,
-                x = fyma_temps.index,
-                name='Max Temp'
-            ),
-            go.Scatter(
-                y = all_max_temp_fit[0],
-                x = all_max_temp_fit.index,
-                name = 'trend',
-                line = {'color':'red'}
-            ),
-        ]
-    elif selected_param == 'Tmin':
-        trace = [
-            go.Scatter(
-                y = all_min_rolling_mean,
-                x = fyma_temps.index,
-                name='Min Temp'
-            ),
-            go.Scatter(
-                y = all_min_temp_fit[0],
-                x = all_min_temp_fit.index,
-                name = 'trend',
-                line = {'color':'red'}
-            ),
-            
-    ]
-    layout = go.Layout(
-        xaxis = {'rangeslider': {'visible':True},},
-        yaxis = {"title": 'Temperature F'},
-        title ='5 Year Rolling Mean',
-        plot_bgcolor = 'lightgray',
-        height = 500,
-    )
-    return {'data': trace, 'layout': layout}
+
+
 
 
 if __name__ == "__main__":

@@ -119,12 +119,20 @@ body {
   font-weight: 400;
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   color: rgb(50, 50, 50);
-  background-color: rgb(160, 192, 229);
+  background-color: rgba(204, 213, 240, 0.781);
   margin: 5%;
 }
 .pretty_container {
   border-radius: 5px;
-  background-color: rgb(83, 134, 201);
+  background-color: rgb(78, 121, 179);
+  margin: 5px;
+  padding: 15px;
+  position: relative;
+  box-shadow: 2px 2px 2px lightgrey;
+}
+.pretty_container2 {
+  border-radius: 5px;
+  background-color: rgb(199, 70, 70);
   margin: 5px;
   padding: 15px;
   position: relative;
@@ -144,7 +152,7 @@ body {
 }
 
 .data_text {
-    font-size;
+    font-size: 2px;
 }
 
 .dcc_control {
